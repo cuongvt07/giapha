@@ -46,7 +46,7 @@ class SidebarLeft extends Component
             'total_members' => \App\Models\Person::count(),
             'living_members' => \App\Models\Person::where('is_alive', true)->count(),
             'deceased_members' => \App\Models\Person::where('is_alive', false)->count(),
-            'total_generations' => \App\Models\Person::max('generation') ?? 0,
+            'total_generations' => \App\Models\Person::whereNotNull('generation_id')->distinct('generation_id')->count('generation_id'),
             'male_members' => \App\Models\Person::where('gender', 'male')->count(),
             'female_members' => \App\Models\Person::where('gender', 'female')->count(),
         ];
