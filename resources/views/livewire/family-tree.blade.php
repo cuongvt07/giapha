@@ -147,8 +147,8 @@
                         {{ $filters['treeTitle'] ?? 'Gia phả dòng họ Nguyễn' }}
                     </h1>
                 </div>
-                <div class="relative flex items-center justify-center w-[900px] h-[300px]"
-                    style="background-image: url('/images/background.png'); background-size: contain; background-repeat: no-repeat; background-position: center;">
+                <div class="relative flex items-center justify-center">
+                    <img src="/images/background.png" alt="Gia phả" class="w-[900px] h-[300px] object-contain" />
                 </div>
             </div>
 

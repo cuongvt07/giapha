@@ -14,8 +14,8 @@
         }
     }
 
-    // COMPACT HIERARCHICAL STYLING - Optimized for readability at all zoom levels
-    // Generation 1 (Thủy Tổ): Most Sacred
+    // COMPACT HIERARCHICAL STYLING
+    // Generation 1 (Thủy Tổ): Most Sacred - HORIZONTAL
     if ($generationLevel == 1) {
         $cardWidth = 'w-56';
         $cardPadding = 'p-3';
@@ -32,8 +32,9 @@
         $decorativeClass = 'ancestor-card';
         $nameClass = 'font-bold text-red-900 tracking-wide';
         $yearClass = 'font-semibold text-red-800';
+        $layoutHorizontal = true;
     }
-    // Generation 2: High Prestige
+    // Generation 2: High Prestige - HORIZONTAL
     elseif ($generationLevel == 2) {
         $cardWidth = 'w-48';
         $cardPadding = 'p-2.5';
@@ -50,33 +51,16 @@
         $decorativeClass = '';
         $nameClass = 'font-bold text-yellow-900';
         $yearClass = 'font-semibold text-yellow-800';
+        $layoutHorizontal = true;
     }
-    // Generation 3: Respected
-    elseif ($generationLevel == 3) {
-        $cardWidth = 'w-44';
+    // Generation 3+: VERTICAL compact layout
+    else {
+        $cardWidth = 'w-28';
         $cardPadding = 'p-2';
         $avatarSize = 'w-12 h-12';
         $avatarIcon = 'h-6 w-6';
-        $nameSize = 'text-sm';
-        $yearSize = 'text-xs';
-        $borderWidth = 'border-2';
-        $borderColor = 'border-amber-500';
-        $shadowClass = 'shadow-md shadow-amber-600/20';
-        $bgOverride = 'bg-gradient-to-br from-amber-50 to-yellow-50';
-        $topBorderColor = 'border-t-[3px] border-t-amber-500';
-        $ringClass = 'ring-1 ring-amber-200';
-        $decorativeClass = '';
-        $nameClass = 'font-bold text-amber-900';
-        $yearClass = 'font-medium text-amber-700';
-    }
-    // Generation 4+: Compact descendants
-    else {
-        $cardWidth = 'w-40';
-        $cardPadding = 'p-2';
-        $avatarSize = 'w-10 h-10';
-        $avatarIcon = 'h-5 w-5';
-        $nameSize = 'text-sm';
-        $yearSize = 'text-xs';
+        $nameSize = 'text-xs';
+        $yearSize = 'text-[10px]';
         $borderWidth = 'border-2';
         $borderColor = $person->gender === 'male' ? 'border-blue-400' : 'border-pink-400';
         $shadowClass = 'shadow-md hover:shadow-lg';
@@ -88,7 +72,8 @@
         $ringClass = '';
         $decorativeClass = '';
         $nameClass = $person->gender === 'male' ? 'font-bold text-blue-900' : 'font-bold text-pink-900';
-        $yearClass = 'font-medium text-gray-700';
+        $yearClass = 'font-semibold text-gray-700';
+        $layoutHorizontal = false;
     }
 
     // Visibility Logic
@@ -138,81 +123,150 @@
             </div>
         @endif
 
-        <!-- Primary Person Card - COMPACT HORIZONTAL LAYOUT -->
-        <div
-            class="{{ $cardWidth }} flex items-center gap-2 {{ $cardPadding }} relative {{ $bgOverride }} {{ $topBorderColor }} {{ $statusClass }}">
-
-            <!-- Status Dot (simple alive/deceased indicator) -->
-            @if (!$person->is_alive)
-                <div class="absolute top-1 right-1 w-1.5 h-1.5 bg-gray-500 rounded-full" title="Đã mất"></div>
-            @endif
-
-            <!-- Avatar (Compact) -->
+        <!-- Primary Person Card -->
+        @if ($layoutHorizontal)
+            {{-- HORIZONTAL LAYOUT for Gen 1-2 --}}
             <div
-                class="{{ $avatarSize }} flex-shrink-0 rounded-full border-2 border-white shadow-md overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 group-hover:scale-105 transition-transform">
-                @if ($person->avatar_url)
-                    <img src="{{ $person->avatar_url }}" alt="{{ $person->name }}" class="w-full h-full object-cover">
-                @else
-                    <div class="w-full h-full flex items-center justify-center text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="{{ $avatarIcon }}" viewBox="0 0 20 20"
-                            fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                class="{{ $cardWidth }} flex items-center gap-2 {{ $cardPadding }} relative {{ $bgOverride }} {{ $topBorderColor }} {{ $statusClass }}">
+
+                @if (!$person->is_alive)
+                    <div class="absolute top-1 right-1 w-1.5 h-1.5 bg-gray-500 rounded-full" title="Đã mất"></div>
+                @endif
+
+                <!-- Avatar -->
+                <div
+                    class="{{ $avatarSize }} flex-shrink-0 rounded-full border-2 border-white shadow-md overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 group-hover:scale-105 transition-transform">
+                    @if ($person->avatar_url)
+                        <img src="{{ $person->avatar_url }}" alt="{{ $person->name }}"
+                            class="w-full h-full object-cover">
+                    @else
+                        <div class="w-full h-full flex items-center justify-center text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="{{ $avatarIcon }}" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Info -->
+                <div class="flex-1 min-w-0 flex flex-col justify-center">
+                    <h3 class="{{ $nameClass }} {{ $nameSize }} truncate leading-tight"
+                        style="text-shadow: 0 1px 2px rgba(255,255,255,0.8);">
+                        {{ $person->name }}
+                    </h3>
+
+                    @if ($filters['showDates'] ?? true)
+                        <p class="{{ $yearClass }} {{ $yearSize }} leading-tight mt-0.5">
+                            {{ $person->birth_year ?? '?' }} -
+                            {{ $person->death_year ?? ($person->is_alive ? 'nay' : '?') }}
+                        </p>
+                    @endif
+
+                    @if ($person->generation_id)
+                        <span
+                            class="inline-block mt-1 px-1.5 py-0.5 bg-indigo-500/90 text-white text-[9px] font-bold rounded leading-none w-fit">
+                            Đời {{ $person->generation_id }}
+                        </span>
+                    @endif
+                </div>
+
+                <!-- Action Buttons (Hover) -->
+                <div
+                    class="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                    <button
+                        class="bg-indigo-500 text-white rounded-full p-0.5 shadow-md hover:bg-indigo-600 hover:scale-110 transition-all"
+                        title="Tập trung"
+                        wire:click.stop="$dispatch('focus-on-branch', { personId: {{ $person->id }} })">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                            <path fill-rule="evenodd"
+                                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
                                 clip-rule="evenodd" />
                         </svg>
-                    </div>
-                @endif
+                    </button>
+                    <button
+                        class="bg-primary-500 text-white rounded-full p-0.5 shadow-md hover:bg-primary-600 hover:scale-110 transition-all"
+                        title="Thêm"
+                        x-on:click.stop="$dispatch('open-add-modal', { parentId: {{ $person->id }} })">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
             </div>
-
-            <!-- Info (Name + Birth Year Only) -->
-            <div class="flex-1 min-w-0 flex flex-col justify-center">
-                <h3 class="{{ $nameClass }} {{ $nameSize }} truncate leading-tight"
-                    style="text-shadow: 0 1px 2px rgba(255,255,255,0.8);">
-                    {{ $person->name }}
-                </h3>
-
-                @if ($filters['showDates'] ?? true)
-                    <p class="{{ $yearClass }} {{ $yearSize }} leading-tight mt-0.5">
-                        {{ $person->birth_year ?? '?' }} -
-                        {{ $person->death_year ?? ($person->is_alive ? 'nay' : '?') }}
-                    </p>
-                @endif
-
-                <!-- Generation Badge (only for Gen 1-3) -->
-                @if ($generationLevel <= 3 && $person->generation_id)
-                    <span
-                        class="inline-block mt-1 px-1.5 py-0.5 bg-indigo-500/90 text-white text-[9px] font-bold rounded leading-none w-fit">
-                        Đời {{ $person->generation_id }}
-                    </span>
-                @endif
-            </div>
-
-            <!-- Action Buttons (Hover) - Smaller -->
+        @else
+            {{-- VERTICAL LAYOUT for Gen 3+ --}}
             <div
-                class="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-30">
-                <!-- Focus on Branch Button -->
-                <button
-                    class="bg-indigo-500 text-white rounded-full p-0.5 shadow-md hover:bg-indigo-600 hover:scale-110 transition-all"
-                    title="Tập trung vào nhánh này"
-                    wire:click.stop="$dispatch('focus-on-branch', { personId: {{ $person->id }} })">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                        <path fill-rule="evenodd"
-                            d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                            clip-rule="evenodd" />
-                    </svg>
-                </button>
-                <!-- Add Button -->
-                <button
-                    class="bg-primary-500 text-white rounded-full p-0.5 shadow-md hover:bg-primary-600 hover:scale-110 transition-all"
-                    title="Thêm" x-on:click.stop="$dispatch('open-add-modal', { parentId: {{ $person->id }} })">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd"
-                            d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                            clip-rule="evenodd" />
-                    </svg>
-                </button>
+                class="{{ $cardWidth }} flex flex-col items-center {{ $cardPadding }} relative {{ $bgOverride }} {{ $topBorderColor }} {{ $statusClass }}">
+
+                @if (!$person->is_alive)
+                    <div class="absolute top-1 right-1 w-1.5 h-1.5 bg-gray-500 rounded-full" title="Đã mất"></div>
+                @endif
+
+                <!-- Avatar -->
+                <div
+                    class="{{ $avatarSize }} rounded-full border-2 border-white shadow-md overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 group-hover:scale-105 transition-transform mb-1">
+                    @if ($person->avatar_url)
+                        <img src="{{ $person->avatar_url }}" alt="{{ $person->name }}"
+                            class="w-full h-full object-cover">
+                    @else
+                        <div class="w-full h-full flex items-center justify-center text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="{{ $avatarIcon }}" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Info -->
+                <div class="text-center w-full">
+                    <h3 class="{{ $nameClass }} {{ $nameSize }} truncate leading-tight px-0.5"
+                        style="text-shadow: 0 1px 2px rgba(255,255,255,0.8);">
+                        {{ $person->name }}
+                    </h3>
+
+                    @if ($filters['showDates'] ?? true)
+                        <p class="{{ $yearClass }} {{ $yearSize }} leading-tight">
+                            {{ $person->birth_year ?? '?' }}
+                        </p>
+                    @endif
+                </div>
+
+                <!-- Action Buttons (Hover) -->
+                <div
+                    class="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                    <button
+                        class="bg-indigo-500 text-white rounded-full p-0.5 shadow-md hover:bg-indigo-600 hover:scale-110 transition-all"
+                        title="Tập trung"
+                        wire:click.stop="$dispatch('focus-on-branch', { personId: {{ $person->id }} })">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" viewBox="0 0 20 20"
+                            fill="currentColor">
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                            <path fill-rule="evenodd"
+                                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <button
+                        class="bg-primary-500 text-white rounded-full p-0.5 shadow-md hover:bg-primary-600 hover:scale-110 transition-all"
+                        title="Thêm"
+                        x-on:click.stop="$dispatch('open-add-modal', { parentId: {{ $person->id }} })">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" viewBox="0 0 20 20"
+                            fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
             </div>
-        </div>
+        @endif
 
         <!-- Spouses List - COMPACT -->
         @if ($filters['showSpouses'] ?? true)
@@ -225,45 +279,81 @@
                     $spouseStatusBorder = $spouse->is_alive ? 'border-t-green-500' : 'border-t-gray-400';
                     $spouseNameColor = $spouse->gender === 'male' ? 'text-blue-900' : 'text-pink-900';
                 @endphp
-                <div class="w-32 flex items-center gap-1.5 p-2 border-l border-gray-300 relative {{ $spouseGenderBg }} {{ $spouseStatusBorder }} border-t-[3px] {{ !$spouse->is_alive ? 'grayscale-[20%] opacity-95' : '' }} hover:bg-opacity-80 transition-all focus:outline-none focus:ring-2 focus:ring-secondary-400"
-                    tabindex="0" @keydown.enter.prevent="$dispatch('person-selected', { id: {{ $spouse->id }} })"
-                    @keydown.space.prevent="$dispatch('person-selected', { id: {{ $spouse->id }} })"
-                    wire:click.stop="$dispatch('person-selected', { id: {{ $spouse->id }} })">
 
-                    <!-- Status Indicator -->
-                    @if (!$spouse->is_alive)
-                        <div class="absolute top-1 right-1 w-1.5 h-1.5 bg-gray-400 rounded-full" title="Đã mất"></div>
-                    @endif
+                @if ($layoutHorizontal)
+                    {{-- Spouse for Gen 1-2: Horizontal compact --}}
+                    <div class="w-28 flex items-center gap-1.5 p-2 border-l border-gray-300 relative {{ $spouseGenderBg }} {{ $spouseStatusBorder }} border-t-[3px] {{ !$spouse->is_alive ? 'grayscale-[20%] opacity-95' : '' }} hover:bg-opacity-80 transition-all"
+                        tabindex="0"
+                        @keydown.enter.prevent="$dispatch('person-selected', { id: {{ $spouse->id }} })"
+                        @keydown.space.prevent="$dispatch('person-selected', { id: {{ $spouse->id }} })"
+                        wire:click.stop="$dispatch('person-selected', { id: {{ $spouse->id }} })">
 
-                    <!-- Avatar (Small) -->
-                    <div
-                        class="w-8 h-8 flex-shrink-0 rounded-full border border-white shadow-sm overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
-                        @if ($spouse->avatar_url)
-                            <img src="{{ $spouse->avatar_url }}" alt="{{ $spouse->name }}"
-                                class="w-full h-full object-cover">
-                        @else
-                            <div class="w-full h-full flex items-center justify-center text-gray-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
-                                    fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                        clip-rule="evenodd" />
-                                </svg>
+                        @if (!$spouse->is_alive)
+                            <div class="absolute top-1 right-1 w-1.5 h-1.5 bg-gray-400 rounded-full" title="Đã mất">
                             </div>
                         @endif
-                    </div>
 
-                    <!-- Info -->
-                    <div class="flex-1 min-w-0">
-                        <h3 class="font-bold {{ $spouseNameColor }} text-xs truncate leading-tight"
-                            style="text-shadow: 0 1px 2px rgba(255,255,255,0.8);">
-                            {{ $spouse->name }}
-                        </h3>
-                        <p class="text-[10px] text-gray-600 font-medium leading-tight">
-                            {{ $spouse->birth_year ?? '?' }} -
-                            {{ $spouse->death_year ?? ($spouse->is_alive ? 'nay' : '?') }}
+                        <div
+                            class="w-8 h-8 flex-shrink-0 rounded-full border border-white shadow-sm overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                            @if ($spouse->avatar_url)
+                                <img src="{{ $spouse->avatar_url }}" alt="{{ $spouse->name }}"
+                                    class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center text-gray-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
+                                        fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold {{ $spouseNameColor }} text-xs truncate leading-tight">
+                                {{ $spouse->name }}</h3>
+                            <p class="text-[10px] text-gray-600 font-medium leading-tight">
+                                {{ $spouse->birth_year ?? '?' }}</p>
+                        </div>
+                    </div>
+                @else
+                    {{-- Spouse for Gen 3+: Ultra compact vertical --}}
+                    <div class="w-24 flex flex-col items-center p-1.5 border-l border-gray-300 relative {{ $spouseGenderBg }} {{ $spouseStatusBorder }} border-t-[3px] {{ !$spouse->is_alive ? 'grayscale-[20%] opacity-95' : '' }} hover:bg-opacity-80 transition-all"
+                        tabindex="0"
+                        @keydown.enter.prevent="$dispatch('person-selected', { id: {{ $spouse->id }} })"
+                        @keydown.space.prevent="$dispatch('person-selected', { id: {{ $spouse->id }} })"
+                        wire:click.stop="$dispatch('person-selected', { id: {{ $spouse->id }} })">
+
+                        @if (!$spouse->is_alive)
+                            <div class="absolute top-0.5 right-0.5 w-1 h-1 bg-gray-400 rounded-full" title="Đã mất">
+                            </div>
+                        @endif
+
+                        <div
+                            class="w-8 h-8 rounded-full border border-white shadow-sm overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 mb-0.5">
+                            @if ($spouse->avatar_url)
+                                <img src="{{ $spouse->avatar_url }}" alt="{{ $spouse->name }}"
+                                    class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center text-gray-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
+                                        fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            @endif
+                        </div>
+
+                        <h3
+                            class="font-bold {{ $spouseNameColor }} text-[10px] truncate leading-tight text-center w-full px-0.5">
+                            {{ $spouse->name }}</h3>
+                        <p class="text-[9px] text-gray-600 font-medium leading-tight">{{ $spouse->birth_year ?? '?' }}
                         </p>
                     </div>
-                </div>
+                @endif
             @endforeach
         @endif
 
