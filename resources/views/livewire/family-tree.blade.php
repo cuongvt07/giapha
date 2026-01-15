@@ -1,6 +1,6 @@
 <div class="relative w-full h-full">
     <div class="w-full h-full" x-data="{
-        scale: 1,
+        scale: 0.5,
         panning: false,
         pointX: 0,
         pointY: 0,
@@ -56,7 +56,7 @@
             }
         },
         resetView() {
-            this.scale = 1;
+            this.scale = 0.5;
             this.pointX = window.innerWidth / 2;
             this.pointY = 100;
         },
@@ -95,7 +95,7 @@
     
         // Auto-center on focused person
         centerView() {
-            this.scale = 1;
+            this.scale = 0.5;
             this.pointX = window.innerWidth / 2;
             this.pointY = 200;
         }
@@ -147,7 +147,7 @@
                         {{ $filters['treeTitle'] ?? 'Gia phả dòng họ Nguyễn' }}
                     </h1>
                 </div>
-                <div class="relative flex items-center justify-center w-[1200px] h-[400px]"
+                <div class="relative flex items-center justify-center w-[900px] h-[300px]"
                     style="background-image: url('/images/background.png'); background-size: contain; background-repeat: no-repeat; background-position: center;">
                 </div>
             </div>

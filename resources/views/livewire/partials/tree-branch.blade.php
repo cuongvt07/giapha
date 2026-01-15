@@ -1,14 +1,14 @@
 @props(['children', 'filters' => []])
 
-<div class="flex flex-row justify-center pt-12 relative">
+<div class="flex flex-row justify-center pt-8 relative">
 
     @foreach ($children as $child)
-        <div class="flex flex-col items-center relative px-8">
+        <div class="flex flex-col items-center relative px-4">
 
             <!-- Branch Drawing Logic (Lines) -->
             <!-- Premium Curved Connectors with Gradient -->
             @if ($children->count() > 1)
-                <div class="absolute top-0 w-full h-12 pointer-events-none">
+                <div class="absolute top-0 w-full h-8 pointer-events-none">
 
                     @if ($loop->first)
                         <!-- First Child: Curve from Right to Bottom ( ╭ ) -->
@@ -31,7 +31,7 @@
             @else
                 <!-- Single child: Straight vertical line -->
                 <div
-                    class="absolute top-0 left-1/2 -translate-x-1/2 h-12 w-[3px] bg-gradient-to-b from-primary-300 to-primary-400 opacity-80 shadow-sm">
+                    class="absolute top-0 left-1/2 -translate-x-1/2 h-8 w-[2px] bg-gradient-to-b from-primary-300 to-primary-400 opacity-80 shadow-sm">
                 </div>
             @endif
 
@@ -43,7 +43,7 @@
             <!-- Recursion for next level -->
             @if ($child->children->isNotEmpty())
                 <!-- Vertical Line Down from Node to Children -->
-                <div class="w-[3px] h-12 bg-gradient-to-b from-primary-300 to-primary-400 opacity-80 shadow-sm"></div>
+                <div class="w-[2px] h-8 bg-gradient-to-b from-primary-300 to-primary-400 opacity-80 shadow-sm"></div>
 
                 @include('livewire.partials.tree-branch', [
                     'children' => $child->children,
