@@ -1,21 +1,8 @@
-{{-- Mobile overlay backdrop --}}
-<div class="lg:hidden fixed inset-0 bg-black/50 z-30 transition-opacity"
-     x-show="!collapsed"
-     x-transition:enter="ease-out duration-300"
-     x-transition:enter-start="opacity-0"
-     x-transition:enter-end="opacity-100"
-     x-transition:leave="ease-in duration-200"
-     x-transition:leave-start="opacity-100"
-     x-transition:leave-end="opacity-0"
-     @click="collapsed = true"
-     style="display: none;">
-</div>
-
 <div wire:ignore.self
     class="h-full flex flex-col bg-white shadow-xl border-r border-gray-200 transform transition-all duration-300 ease-in-out z-40
            fixed lg:relative inset-y-0 left-0"
     x-data="{
-        collapsed: $persist(false).as('sidebar-collapsed'),
+        collapsed: $persist(true).as('sidebar-collapsed'),
         openFilters: true,
         openStats: true,
         toggle() {
@@ -26,6 +13,19 @@
         collapsed ? '-translate-x-full lg:translate-x-0 lg:w-16' : 'translate-x-0 w-80',
         'lg:transform-none'
     ]">
+
+    {{-- Mobile overlay backdrop (now inside x-data scope) --}}
+    <div class="lg:hidden fixed inset-0 bg-black/50 z-30 transition-opacity -ml-80"
+         x-show="!collapsed"
+         x-transition:enter="ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="collapsed = true"
+         style="display: none;">
+    </div>
 
     {{-- Header --}}
     <div class="flex items-center justify-between p-4 border-b border-gray-100 bg-[#C41E3A] text-white">

@@ -96,7 +96,6 @@ class SidebarRight extends Component
             'marriagesAsWife.husband'
         ])->find($this->personId);
         $this->viewState = 'details';
-        $this->viewState = 'details';
         $this->activeTab = 'info';
         $this->detailsOpen = true;
     }
