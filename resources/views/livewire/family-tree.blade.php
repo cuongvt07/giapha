@@ -1,5 +1,16 @@
 <div class="relative w-full h-full">
-    <div class="w-full h-full" x-data="{
+    {{-- MOBILE: Vertical Tree Layout --}}
+    <div class="lg:hidden w-full h-full">
+        @include('livewire.partials.vertical-tree', [
+            'rootPerson' => $rootPerson,
+            'breadcrumbPath' => $breadcrumbPath,
+            'focusedPersonId' => $focusedPersonId,
+            'filters' => $filters,
+        ])
+    </div>
+
+    {{-- DESKTOP: Horizontal Tree with Pan/Zoom --}}
+    <div class="hidden lg:block w-full h-full" x-data="{
         scale: 0.5,
         panning: false,
         pointX: 0,
@@ -37,7 +48,6 @@
                 const zoomFactor = 1.1;
     
                 // Calculate cursor position relative to the transformed origin
-                // This 'corrects' the zoom point to follow the mouse
                 const xs = (e.clientX - this.pointX) / this.scale;
                 const ys = (e.clientY - this.pointY) / this.scale;
     
@@ -310,4 +320,7 @@
             <p class="text-xs text-gray-400 mt-1">Vui lòng đợi trong giây lát</p>
         </div>
     </div>
+
+    {{-- Mobile Bottom Navigation --}}
+    @include('components.bottom-nav')
 </div>

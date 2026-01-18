@@ -30,6 +30,16 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
+    
+    /* Alias for TailwindCSS compatibility */
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
 
     /* Traditional Vietnamese Ancestor Card Styling */
     @keyframes pulse-subtle {

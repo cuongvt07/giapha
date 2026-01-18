@@ -1,14 +1,18 @@
 <div>
-    <!-- FLOATING CARD: Single Interface for Tools & Details (Right Side) -->
+    {{-- Responsive Sidebar Right: Full screen on mobile, floating card on desktop --}}
     <div wire:ignore.self
-        class="pointer-events-auto absolute right-4 top-4 flex flex-col gap-2 w-80 transition-transform duration-300 ease-in-out z-40 font-sans"
+        class="pointer-events-auto z-40 font-sans transition-transform duration-300 ease-in-out
+               fixed inset-0 lg:absolute lg:inset-auto lg:right-4 lg:top-4 lg:w-80
+               bg-white lg:bg-transparent"
         x-data="{
             detailsOpen: @entangle('detailsOpen'),
-        }" :class="detailsOpen ? 'translate-x-0' : 'translate-x-full'">
+        }" 
+        :class="detailsOpen ? 'translate-x-0 lg:translate-x-0' : 'translate-x-full'"
+        style="padding-bottom: env(safe-area-inset-bottom);">
 
-        <!-- Floating Toggle Button (Appears on Left edge) -->
+        {{-- Toggle Button (Desktop only) --}}
         <button wire:click="toggle"
-            class="absolute top-3 -left-8 w-8 h-8 bg-white border border-gray-100 shadow-sm rounded-l-md flex items-center justify-center text-gray-400 hover:text-primary-600 focus:outline-none transition-all duration-300 z-50 group hover:w-10 overflow-visible"
+            class="hidden lg:flex absolute top-3 -left-8 w-8 h-8 bg-white border border-gray-100 shadow-sm rounded-l-md items-center justify-center text-gray-400 hover:text-primary-600 focus:outline-none transition-all duration-300 z-50 group hover:w-10 overflow-visible"
             title="Ẩn/Hiện Menu">
             <template x-if="detailsOpen">
                 <svg xmlns="http://www.w3.org/2000/svg"
@@ -28,9 +32,8 @@
             </template>
         </button>
 
-        <!-- Main Card Content -->
-        <div
-            class="bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border border-gray-100 w-full overflow-hidden flex flex-col max-h-[85vh]">
+        {{-- Main Card Content --}}
+        <div class="bg-white/95 backdrop-blur-sm lg:rounded-xl lg:shadow-xl lg:border lg:border-gray-100 w-full overflow-hidden flex flex-col h-full lg:max-h-[85vh]">
 
             <div class="flex flex-col w-full h-full overflow-hidden">
 
@@ -206,23 +209,22 @@
                             </div>
                         </div>
 
-                        <!-- TABS NAVIGATION -->
-                        <div
-                            class="flex items-center gap-1 px-2 border-b border-gray-100 overflow-x-auto no-scrollbar">
+                        {{-- TABS NAVIGATION - Horizontal Scrollable on Mobile --}}
+                        <div class="flex items-center gap-1 px-2 border-b border-gray-100 overflow-x-auto snap-x snap-mandatory scrollbar-hide">
                             <button wire:click="setTab('info')"
-                                class="px-3 py-2 text-xs font-semibold border-b-2 transition-colors whitespace-nowrap {{ $activeTab === 'info' ? 'border-primary-500 text-primary-700' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                class="snap-start flex-shrink-0 px-3 py-2 text-xs font-semibold border-b-2 transition-colors whitespace-nowrap {{ $activeTab === 'info' ? 'border-primary-500 text-primary-700' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                                 Thông tin
                             </button>
                             <button wire:click="setTab('bio')"
-                                class="px-3 py-2 text-xs font-semibold border-b-2 transition-colors whitespace-nowrap {{ $activeTab === 'bio' ? 'border-primary-500 text-primary-700' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                class="snap-start flex-shrink-0 px-3 py-2 text-xs font-semibold border-b-2 transition-colors whitespace-nowrap {{ $activeTab === 'bio' ? 'border-primary-500 text-primary-700' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                                 Tiểu sử
                             </button>
                             <button wire:click="setTab('burial')"
-                                class="px-3 py-2 text-xs font-semibold border-b-2 transition-colors whitespace-nowrap {{ $activeTab === 'burial' ? 'border-primary-500 text-primary-700' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                class="snap-start flex-shrink-0 px-3 py-2 text-xs font-semibold border-b-2 transition-colors whitespace-nowrap {{ $activeTab === 'burial' ? 'border-primary-500 text-primary-700' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                                 Mộ phần
                             </button>
                             <button wire:click="setTab('achievements')"
-                                class="px-3 py-2 text-xs font-semibold border-b-2 transition-colors whitespace-nowrap {{ $activeTab === 'achievements' ? 'border-primary-500 text-primary-700' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                class="snap-start flex-shrink-0 px-3 py-2 text-xs font-semibold border-b-2 transition-colors whitespace-nowrap {{ $activeTab === 'achievements' ? 'border-primary-500 text-primary-700' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                                 Thành tích
                             </button>
                         </div>
