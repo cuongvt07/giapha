@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
+            FamilyBranchSeeder::class,
             FamilySeeder::class,
         ]);
     }

@@ -9,6 +9,7 @@
     @livewireStyles
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsPlumb/2.15.6/js/jsplumb.min.js"></script>
     <style>
         html,
         body {
@@ -16,8 +17,12 @@
             width: 100%;
             overflow: hidden;
             /* Critical for the infinite canvas feel */
+            /* touch-action: none; -- REMOVED: This was blocking all touch events on mobile */
+        }
+
+        /* Apply touch-action: none only to the tree canvas */
+        .tree-canvas-touch {
             touch-action: none;
-            /* Disable browser handling of gestures */
         }
 
         /* Pulse glow animation for focused person */
@@ -43,7 +48,7 @@
 
     <!-- Top Navigation Bar -->
     <header
-        class="absolute top-0 left-0 right-0 h-14 bg-white/90 backdrop-blur-sm border-b border-gray-200 z-40 flex items-center justify-between px-4 shadow-sm">
+        class="absolute top-0 left-0 right-0 h-14 bg-white/90 backdrop-blur-sm border-b border-gray-200 z-40 hidden lg:flex items-center justify-between px-4 shadow-sm">
         <div class="flex items-center gap-3">
             <div
                 class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center text-white font-bold text-lg font-serif">
@@ -77,7 +82,7 @@
     </header>
 
     <!-- Main Content Area -->
-    <main class="absolute inset-0 top-14 z-0">
+    <main class="absolute inset-0 top-0 lg:top-14 z-0">
         {{ $slot }}
     </main>
 

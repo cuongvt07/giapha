@@ -98,6 +98,29 @@ class FamilyTree extends Component
     }
 
 
+    public function selectPerson($personId)
+    {
+        $this->dispatch('person-selected', id: $personId);
+    }
+
+    public function deletePerson($personId)
+    {
+        $person = Person::find($personId);
+        if ($person) {
+            // Check if deleting current root
+            if ($this->rootPerson && $this->rootPerson->id == $personId) {
+                $this->resetToRoot();
+            }
+            
+            // Delete person (database should handle cascades or orphans)
+            $person->delete();
+            
+            // Refresh logic handled by Livewire re-render
+            // Optionally notify user
+        }
+    }
+
+
     public function render()
     {
         return view('livewire.family-tree')

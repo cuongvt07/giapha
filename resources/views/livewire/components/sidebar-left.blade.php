@@ -1,30 +1,25 @@
 <div wire:ignore.self
-    class="h-full flex flex-col bg-white shadow-xl border-r border-gray-200 transform transition-all duration-300 ease-in-out z-40
-           fixed lg:relative inset-y-0 left-0"
-    x-data="{
+    class="h-full flex flex-col bg-white shadow-xl border-r border-gray-200 transition-all duration-300 ease-in-out z-[100]
+           fixed inset-y-0 left-0"
+    style="touch-action: auto;" x-data="{
         collapsed: $persist(true).as('sidebar-collapsed'),
         openFilters: true,
         openStats: true,
         toggle() {
+            console.log('Sidebar toggled, collapsed was:', this.collapsed);
             this.collapsed = !this.collapsed;
+            console.log('Sidebar collapsed is now:', this.collapsed);
+            console.log('Element classes will be:', this.collapsed ? '-translate-x-full' : 'translate-x-0 w-80');
         }
-    }" 
-    :class="[
-        collapsed ? '-translate-x-full lg:translate-x-0 lg:w-16' : 'translate-x-0 w-80',
-        'lg:transform-none'
-    ]">
+    }" @toggle-sidebar.window="toggle()"
+    :style="collapsed ? 'transform: translateX(-100%); width: 0;' : 'transform: translateX(0); width: 20rem;'">
 
     {{-- Mobile overlay backdrop (now inside x-data scope) --}}
-    <div class="lg:hidden fixed inset-0 bg-black/50 z-30 transition-opacity -ml-80"
-         x-show="!collapsed"
-         x-transition:enter="ease-out duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="ease-in duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         @click="collapsed = true"
-         style="display: none;">
+    <div class="lg:hidden fixed inset-0 bg-black/50 z-30 transition-opacity -ml-80" x-show="!collapsed"
+        x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
+        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" @click="collapsed = true"
+        style="display: none;">
     </div>
 
     {{-- Header --}}
@@ -397,7 +392,8 @@
     </div>
 
     {{-- Collapsed Mode - Icon-Only Quick Actions (Desktop only) --}}
-    <div class="hidden lg:flex flex-1 flex-col items-center justify-center gap-6 py-6" x-show="collapsed" x-transition>
+    <div class="hidden lg:flex flex-1 flex-col items-center justify-center gap-6 py-6" x-show="collapsed"
+        x-transition>
         {{-- Expand Button --}}
         <button @click="toggle()" class="p-3 hover:bg-gray-100 rounded-lg transition-colors group"
             title="Mở rộng sidebar">

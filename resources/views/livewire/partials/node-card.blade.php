@@ -131,8 +131,10 @@
     </div>
 
     <!-- Combined Card Container (Main Person + Spouses) -->
-    <div
-        class="flex items-stretch rounded-xl {{ $shadowClass }} {{ $borderWidth }} {{ $borderColor }} {{ $ringClass }} {{ $decorativeClass }} overflow-hidden transition-all duration-300 ease-out group-hover:border-primary-400 relative
+    <div id="node-{{ $person->id }}"
+        @if ($person->father_id) data-parent-id="node-{{ $person->father_id }}" @endif
+        @if ($person->mother_id && !$person->father_id) data-parent-id="node-{{ $person->mother_id }}" @endif
+        class="flex items-stretch rounded-xl {{ $shadowClass }} {{ $borderWidth }} {{ $borderColor }} {{ $ringClass }} {{ $decorativeClass }} transition-all duration-300 ease-out group-hover:border-primary-400 relative
         @if (isset($filters['focusedPersonId']) && $filters['focusedPersonId'] == $person->id) !border-purple-500 !border-[3px] !ring-2 !ring-purple-300 @endif">
 
         @if ($generationLevel == 1)
@@ -148,7 +150,7 @@
         @if ($layoutHorizontal)
             {{-- HORIZONTAL LAYOUT for Gen 1-2 --}}
             <div
-                class="{{ $cardWidth }} flex items-center gap-2 {{ $cardPadding }} relative {{ $bgOverride }} {{ $topBorderColor }} {{ $statusClass }}">
+                class="{{ $cardWidth }} flex items-center gap-2 {{ $cardPadding }} pb-3 relative {{ $bgOverride }} {{ $topBorderColor }} {{ $statusClass }}">
 
                 @if (!$person->is_alive)
                     <div class="absolute top-1 right-1 w-1.5 h-1.5 bg-gray-500 rounded-full" title="Đã mất"></div>
@@ -197,9 +199,9 @@
                 <div
                     class="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-30">
                     <button
-                        class="bg-indigo-500 text-white rounded-full p-0.5 shadow-md hover:bg-indigo-600 hover:scale-110 transition-all"
+                        class="bg-indigo-500 text-white rounded-full p-0.5 shadow-md hover:bg-indigo-600 hover:scale-110 transition-all center-node-btn"
                         title="Tập trung"
-                        wire:click.stop="$dispatch('focus-on-branch', { personId: {{ $person->id }} })">
+                        @click.stop="$dispatch('center-on-node', { nodeId: 'node-{{ $person->id }}' })">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                             <path fill-rule="evenodd"
@@ -217,11 +219,21 @@
                                 clip-rule="evenodd" />
                         </svg>
                     </button>
+                    <button
+                        class="bg-red-500 text-white rounded-full p-0.5 shadow-md hover:bg-red-600 hover:scale-110 transition-all"
+                        title="Xóa" wire:confirm="Bạn có chắc muốn xóa?"
+                        wire:click.stop="deletePerson({{ $person->id }})">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
                 </div>
             </div>
         @else
             {{-- VERTICAL TEXT LAYOUT for Gen 4+ (like traditional gia pha) --}}
-            <div class="flex flex-col items-center {{ $cardPadding }} relative {{ $bgOverride }} {{ $topBorderColor }} {{ $statusClass }}"
+            <div class="flex flex-col items-center {{ $cardPadding }} pb-3 relative {{ $bgOverride }} {{ $topBorderColor }} {{ $statusClass }}"
                 style="min-width: 2.5rem;">
 
                 @if (!$person->is_alive)
@@ -263,9 +275,9 @@
                 <div
                     class="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-30">
                     <button
-                        class="bg-indigo-500 text-white rounded-full p-0.5 shadow-md hover:bg-indigo-600 hover:scale-110 transition-all"
+                        class="bg-indigo-500 text-white rounded-full p-0.5 shadow-md hover:bg-indigo-600 hover:scale-110 transition-all center-node-btn"
                         title="Tập trung"
-                        wire:click.stop="$dispatch('focus-on-branch', { personId: {{ $person->id }} })">
+                        @click.stop="$dispatch('center-on-node', { nodeId: 'node-{{ $person->id }}' })">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-2 w-2" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                             <path fill-rule="evenodd"
@@ -280,6 +292,17 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-2 w-2" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"
                                 d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <button
+                        class="bg-red-500 text-white rounded-full p-0.5 shadow-md hover:bg-red-600 hover:scale-110 transition-all"
+                        title="Xóa" wire:confirm="Bạn có chắc muốn xóa?"
+                        wire:click.stop="deletePerson({{ $person->id }})">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-2 w-2" viewBox="0 0 20 20"
+                            fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
                                 clip-rule="evenodd" />
                         </svg>
                     </button>
