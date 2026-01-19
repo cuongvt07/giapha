@@ -22,8 +22,13 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'admin@example.com',
         // ]);
 
+        // Choose which seeder to run:
+        // - FamilySeeder: Small demo family (30 people, 5 generations)
+        // - FamilyTreeSeeder: Large comprehensive family tree (100 people, 8 generations)
+        
         $this->call([
-            FamilySeeder::class,
+            // FamilySeeder::class,           // Comment this out if using FamilyTreeSeeder
+            FamilyTreeSeeder::class,          // Uncomment to use the larger dataset
         ]);
     }
 }
