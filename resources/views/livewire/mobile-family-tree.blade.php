@@ -1,5 +1,5 @@
 <div class="h-full w-full flex flex-col relative"
-    style="background: url('https://giapha-hoangtoc.vercel.app/images/tree-bg.jpg') center/cover fixed;">
+    style="background: url('/images/bg-dragon-scroll.jpg') center/cover fixed;">
     {{-- Header --}}
     <header
         class="flex-shrink-0 h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4 z-40 shadow-sm relative">

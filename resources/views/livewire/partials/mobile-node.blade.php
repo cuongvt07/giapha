@@ -1,74 +1,68 @@
 {{-- Mobile Node (Generation-aware layout) --}}
-// Default values to prevent undefined variable errors
-$generationLevel = $generationLevel ?? 1;
-$cardWidth = 'w-24';
-$avatarSize = 'w-10 h-10';
-$nameSize = 'text-xs';
-$yearSize = 'text-[10px]';
-$cardBg = 'bg-white';
-$borderColor = 'border-gray-300';
-$topBorderColor = 'border-t-gray-400';
-$padding = 'p-2';
-$ringClass = '';
-$useVerticalText = false;
+@php
+    // Default values to prevent undefined variable errors
+    $generationLevel = $generationLevel ?? 1;
+    $cardWidth = 'w-24';
+    $avatarSize = 'w-10 h-10';
+    $nameSize = 'text-xs';
+    $yearSize = 'text-[10px]';
+    $cardBg = 'bg-white';
+    $borderColor = 'border-gray-300';
+    $topBorderColor = 'border-t-gray-400';
+    $padding = 'p-2';
+    $ringClass = '';
+    $useVerticalText = false;
 
-// Apply Logic based on Generation
-if ($generationLevel == 1) {
-$cardWidth = 'w-48';
-$avatarSize = 'w-16 h-16';
-$nameSize = 'text-base';
-$yearSize = 'text-xs';
-$cardBg = 'bg-gradient-to-br from-amber-50 via-yellow-100 to-amber-100';
-$borderColor = 'border-red-700';
-$padding = 'p-3';
-$ringClass = 'ring-2 ring-yellow-400 ring-offset-1 ring-offset-red-800';
-$topBorderColor = 'border-t-red-700 border-t-4';
-}
-elseif ($generationLevel == 2) {
-$cardWidth = 'w-40';
-$avatarSize = 'w-14 h-14';
-$nameSize = 'text-sm';
-$yearSize = 'text-[11px]';
-$cardBg = 'bg-gradient-to-br from-yellow-50 to-amber-100';
-$borderColor = 'border-yellow-600';
-$padding = 'p-2.5';
-$ringClass = 'ring-1 ring-yellow-300';
-$topBorderColor = 'border-t-yellow-600 border-t-4';
-}
-elseif ($generationLevel == 3) {
-$cardWidth = 'w-32';
-$avatarSize = 'w-12 h-12';
-$nameSize = 'text-xs';
-$yearSize = 'text-[10px]';
-$cardBg = 'bg-gradient-to-br from-amber-50 to-yellow-50';
-$borderColor = 'border-amber-500';
-$padding = 'p-2';
-$ringClass = ''; // No ring
-$topBorderColor = 'border-t-amber-500 border-t-4';
-}
-else {
-// Generation 4+ (Vertical Text)
-$useVerticalText = true;
-$cardWidth = 'w-10';
-$avatarSize = 'w-8 h-8';
-$nameSize = 'text-[10px]';
-$yearSize = 'text-[9px]';
+    // Apply Logic based on Generation
+    if ($generationLevel == 1) {
+        $cardWidth = 'w-48';
+        $avatarSize = 'w-16 h-16';
+        $nameSize = 'text-base';
+        $yearSize = 'text-xs';
+        $cardBg = 'bg-gradient-to-br from-amber-50 via-yellow-100 to-amber-100';
+        $borderColor = 'border-red-700';
+        $padding = 'p-3';
+        $ringClass = 'ring-2 ring-yellow-400 ring-offset-1 ring-offset-red-800';
+        $topBorderColor = 'border-t-red-700 border-t-4';
+    } elseif ($generationLevel == 2) {
+        $cardWidth = 'w-40';
+        $avatarSize = 'w-14 h-14';
+        $nameSize = 'text-sm';
+        $yearSize = 'text-[11px]';
+        $cardBg = 'bg-gradient-to-br from-yellow-50 to-amber-100';
+        $borderColor = 'border-yellow-600';
+        $padding = 'p-2.5';
+        $ringClass = 'ring-1 ring-yellow-300';
+        $topBorderColor = 'border-t-yellow-600 border-t-4';
+    } elseif ($generationLevel == 3) {
+        $cardWidth = 'w-32';
+        $avatarSize = 'w-12 h-12';
+        $nameSize = 'text-xs';
+        $yearSize = 'text-[10px]';
+        $cardBg = 'bg-gradient-to-br from-amber-50 to-yellow-50';
+        $borderColor = 'border-amber-500';
+        $padding = 'p-2';
+        $ringClass = ''; // No ring
+        $topBorderColor = 'border-t-amber-500 border-t-4';
+    } else {
+        // Generation 4+ (Vertical Text)
+        $useVerticalText = true;
+        $cardWidth = 'w-10';
+        $avatarSize = 'w-8 h-8';
+        $nameSize = 'text-[10px]';
+        $yearSize = 'text-[9px]';
 
-$isMale = $person->gender === 'male';
-$cardBg = $isMale
-? 'bg-gradient-to-b from-blue-50 to-blue-100'
-: 'bg-gradient-to-b from-pink-50 to-pink-100';
-$borderColor = $isMale ? 'border-blue-400' : 'border-pink-400';
-$padding = 'py-2 px-1';
-$ringClass = '';
+        $isMale = $person->gender === 'male';
+        $cardBg = $isMale ? 'bg-gradient-to-b from-blue-50 to-blue-100' : 'bg-gradient-to-b from-pink-50 to-pink-100';
+        $borderColor = $isMale ? 'border-blue-400' : 'border-pink-400';
+        $padding = 'py-2 px-1';
+        $ringClass = '';
 
-// Status border
-$topBorderColor = $person->is_alive
-? 'border-t-green-500 border-t-[3px]'
-: 'border-t-gray-400 border-t-[3px]';
-}
+        // Status border
+        $topBorderColor = $person->is_alive ? 'border-t-green-500 border-t-[3px]' : 'border-t-gray-400 border-t-[3px]';
+    }
 
-$childGeneration = $generationLevel + 1;
+    $childGeneration = $generationLevel + 1;
 
 @endphp
 

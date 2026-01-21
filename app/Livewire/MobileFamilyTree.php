@@ -22,7 +22,90 @@ class MobileFamilyTree extends Component
     public $addParentId = null;
     public $editingPersonId = null;
 
-    // ... (Fields remain same) ...
+    public function mount()
+    {
+        $this->loadRootPerson();
+    }
+
+    public function loadRootPerson()
+    {
+        $root = Person::with([
+            'father',
+            'mother',
+            'children',
+            'children.children',
+            'children.children.children',
+             // Load deep enough for initial view, subsequent loads can be dynamic or on demand
+            // Re-adding relations safely based on previous fix
+             'marriagesAsHusband.wife',
+             'marriagesAsWife.husband',
+             'burialInfo'
+        ])
+            ->whereNull('father_id')
+            ->whereNull('mother_id')
+            ->first();
+
+        if ($root) {
+            $this->originalRootId = $root->id;
+            $this->rootPerson = $root;
+             // Ensure relations accessible for blade to prevent "property of non-object" on first load
+        }
+    }
+
+    public function resetToRoot()
+    {
+        $this->focusedPersonId = null;
+        if ($this->originalRootId) {
+             // Reload to ensure fresh data
+             $this->loadRootPerson();
+        }
+        $this->treeVersion++;
+        $this->dispatch('tree-updated');
+    }
+
+    public function toggleMenu()
+    {
+        $this->showMenu = !$this->showMenu;
+    }
+
+    public function closeMenu()
+    {
+        $this->showMenu = false;
+    }
+
+    // Form Fields
+    public $newPersonName;
+    public $newPersonGender = 'male';
+    public $newPersonBirthYear;
+    public $newPersonIsAlive = true;
+    public $newPersonNickname;
+    public $newPersonTitle;
+    public $newPersonOccupation;
+    public $newPersonHometown;
+    public $newPersonPlaceOfBirth;
+    public $newPersonAddress;
+    public $newPersonPhone;
+    public $newPersonEmail;
+    public $newPersonDeathYear;
+    public $newPersonDeathDateFull;
+    public $newPersonBurialPlace;
+    public $newPersonBurialDate;
+    
+    // File Uploads
+    public $newPersonAvatar;
+    public $newPersonGravePhoto;
+    public $existingAvatarUrl;
+    public $existingGravePhotoUrl;
+
+    // Filters
+    public $filters = [
+        'showAlive' => true,
+        'showDeceased' => true,
+        'showMale' => true,
+        'showFemale' => true,
+        'showDates' => true,
+        'showSpouses' => true,
+    ];
 
     // Modal Management
     public function openModal($personId, $mode = 'view')
