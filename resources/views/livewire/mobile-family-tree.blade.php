@@ -257,7 +257,8 @@
                             this.centerOnNode(root.id);
                         }
                     }, 500);
-                }
+                },
+
                 handleTreeUpdate(focusNodeId) {
                     setTimeout(() => {
                         this.drawConnections();
