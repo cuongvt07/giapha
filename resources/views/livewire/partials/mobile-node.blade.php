@@ -72,6 +72,7 @@
     }
 
     $childGeneration = $generationLevel + 1;
+    $useVerticalText = $generationLevel >= 4;
 
 @endphp
 
