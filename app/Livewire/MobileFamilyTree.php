@@ -57,7 +57,6 @@ class MobileFamilyTree extends Component
             'father',
             'mother',
             'children',
-            'spouses',
             'burialInfo',
             'achievements',
             'marriagesAsHusband.wife',
