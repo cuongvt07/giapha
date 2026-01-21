@@ -1,78 +1,74 @@
 {{-- Mobile Node (Generation-aware layout) --}}
-@php
-    // Use passed generationLevel or default to 1
-    $generationLevel = $generationLevel ?? 1;
+// Default values to prevent undefined variable errors
+$generationLevel = $generationLevel ?? 1;
+$cardWidth = 'w-24';
+$avatarSize = 'w-10 h-10';
+$nameSize = 'text-xs';
+$yearSize = 'text-[10px]';
+$cardBg = 'bg-white';
+$borderColor = 'border-gray-300';
+$topBorderColor = 'border-t-gray-400';
+$padding = 'p-2';
+$ringClass = '';
+$useVerticalText = false;
 
-    // Card sizes based on generation
-    // Generation 1 (Thủy Tổ): Most Sacred
-    if ($generationLevel == 1) {
-        $cardWidth = 'w-48'; // Wider for Gen 1
-        $avatarSize = 'w-16 h-16';
-        $nameSize = 'text-base';
-        $yearSize = 'text-xs';
-        $cardBg = 'bg-gradient-to-br from-amber-50 via-yellow-100 to-amber-100'; // PC Gen 1 Bg
-        $borderColor = 'border-red-700'; // PC Gen 1 Border
-        $padding = 'p-3';
-        $ringClass = 'ring-2 ring-yellow-400 ring-offset-1 ring-offset-red-800'; // PC Ring
-    }
-    // Generation 2: High Prestige
-    elseif ($generationLevel == 2) {
-        $cardWidth = 'w-40';
-        $avatarSize = 'w-14 h-14';
-        $nameSize = 'text-sm';
-        $yearSize = 'text-[11px]';
-        $cardBg = 'bg-gradient-to-br from-yellow-50 to-amber-100'; // PC Gen 2 Bg
-        $borderColor = 'border-yellow-600'; // PC Gen 2 Border
-        $padding = 'p-2.5';
-        $ringClass = 'ring-1 ring-yellow-300';
-    }
-    // Generation 3: Respected
-    elseif ($generationLevel == 3) {
-        $cardWidth = 'w-32';
-        $avatarSize = 'w-12 h-12';
-        $nameSize = 'text-xs';
-        $yearSize = 'text-[10px]';
-        $cardBg = 'bg-gradient-to-br from-amber-50 to-yellow-50'; // PC Gen 3 Bg
-        $borderColor = 'border-amber-500'; // PC Gen 3 Border
-        $padding = 'p-2';
-        $ringClass = '';
-    }
-    // Generation 4+: Standard (Vertical Text)
-    else {
-        // Gen 4+ Vertical Text
-        $cardWidth = 'w-10'; // Narrow width for vertical text
-        $avatarSize = 'w-8 h-8';
-        $nameSize = 'text-[10px]';
-        $yearSize = 'text-[9px]';
-        // PC Gen 4+ Bg by Gender
-        $cardBg =
-            $person->gender === 'male'
-                ? 'bg-gradient-to-b from-blue-50 to-blue-100'
-                : 'bg-gradient-to-b from-pink-50 to-pink-100';
-        // PC Gen 4+ Border by Gender
-        $borderColor = $person->gender === 'male' ? 'border-blue-400' : 'border-pink-400';
-        $padding = 'py-2 px-1';
-        $ringClass = '';
-    }
+// Apply Logic based on Generation
+if ($generationLevel == 1) {
+$cardWidth = 'w-48';
+$avatarSize = 'w-16 h-16';
+$nameSize = 'text-base';
+$yearSize = 'text-xs';
+$cardBg = 'bg-gradient-to-br from-amber-50 via-yellow-100 to-amber-100';
+$borderColor = 'border-red-700';
+$padding = 'p-3';
+$ringClass = 'ring-2 ring-yellow-400 ring-offset-1 ring-offset-red-800';
+$topBorderColor = 'border-t-red-700 border-t-4';
+}
+elseif ($generationLevel == 2) {
+$cardWidth = 'w-40';
+$avatarSize = 'w-14 h-14';
+$nameSize = 'text-sm';
+$yearSize = 'text-[11px]';
+$cardBg = 'bg-gradient-to-br from-yellow-50 to-amber-100';
+$borderColor = 'border-yellow-600';
+$padding = 'p-2.5';
+$ringClass = 'ring-1 ring-yellow-300';
+$topBorderColor = 'border-t-yellow-600 border-t-4';
+}
+elseif ($generationLevel == 3) {
+$cardWidth = 'w-32';
+$avatarSize = 'w-12 h-12';
+$nameSize = 'text-xs';
+$yearSize = 'text-[10px]';
+$cardBg = 'bg-gradient-to-br from-amber-50 to-yellow-50';
+$borderColor = 'border-amber-500';
+$padding = 'p-2';
+$ringClass = ''; // No ring
+$topBorderColor = 'border-t-amber-500 border-t-4';
+}
+else {
+// Generation 4+ (Vertical Text)
+$useVerticalText = true;
+$cardWidth = 'w-10';
+$avatarSize = 'w-8 h-8';
+$nameSize = 'text-[10px]';
+$yearSize = 'text-[9px]';
 
-    $topBorderColor =
-        $generationLevel <= 3
-            ? 'border-t-4' // Thicker top border for ancestors
-            : ($person->is_alive
-                ? 'border-t-green-500 border-t-[3px]'
-                : 'border-t-gray-400 border-t-[3px]');
+$isMale = $person->gender === 'male';
+$cardBg = $isMale
+? 'bg-gradient-to-b from-blue-50 to-blue-100'
+: 'bg-gradient-to-b from-pink-50 to-pink-100';
+$borderColor = $isMale ? 'border-blue-400' : 'border-pink-400';
+$padding = 'py-2 px-1';
+$ringClass = '';
 
-    // Specific top border colors for ancestors
-    if ($generationLevel == 1) {
-        $topBorderColor .= ' border-t-red-700';
-    } elseif ($generationLevel == 2) {
-        $topBorderColor .= ' border-t-yellow-600';
-    } elseif ($generationLevel == 3) {
-        $topBorderColor .= ' border-t-amber-500';
-    }
+// Status border
+$topBorderColor = $person->is_alive
+? 'border-t-green-500 border-t-[3px]'
+: 'border-t-gray-400 border-t-[3px]';
+}
 
-    $childGeneration = $generationLevel + 1;
-    $useVerticalText = $generationLevel >= 4;
+$childGeneration = $generationLevel + 1;
 
 @endphp
 
