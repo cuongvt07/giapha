@@ -1,4 +1,5 @@
-<div class="h-full w-full flex flex-col relative bg-gray-50">
+<div class="h-full w-full flex flex-col relative"
+    style="background: url('https://giapha-hoangtoc.vercel.app/images/tree-bg.jpg') center/cover fixed;">
     {{-- Header --}}
     <header
         class="flex-shrink-0 h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4 z-40 shadow-sm relative">
@@ -313,22 +314,16 @@
         @include('livewire.partials.mobile-menu')
     </div>
 
-    {{-- Bottom Sheet --}}
-    @if ($showBottomSheet && $selectedPerson)
-        <div class="fixed inset-0 z-40" wire:click="closeBottomSheet">
-            <div class="absolute inset-0 bg-black/30"></div>
-        </div>
-        <div class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl z-50 max-h-[70vh] overflow-hidden">
-            @include('livewire.partials.mobile-bottom-sheet', ['person' => $selectedPerson])
-        </div>
-    @endif
-
-    {{-- Add Modal --}}
-    @if ($showAddModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
-            <div class="absolute inset-0 bg-black/50" wire:click="closeAddModal"></div>
-            <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-                @include('livewire.partials.mobile-add-form')
+    {{-- Unified Modal --}}
+    @if ($modalMode !== 'none')
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4">
+            <div class="absolute inset-0 bg-black/50" wire:click="closeModal"></div>
+            <div
+                class="relative bg-white w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl shadow-xl overflow-hidden flex flex-col">
+                @include('livewire.partials.mobile-person-modal', [
+                    'mode' => $modalMode,
+                    'selectedPerson' => $selectedPerson,
+                ])
             </div>
         </div>
     @endif

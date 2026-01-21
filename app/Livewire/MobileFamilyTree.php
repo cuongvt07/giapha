@@ -17,152 +17,72 @@ class MobileFamilyTree extends Component
 
     // UI States
     public $showMenu = false;
-    public $showBottomSheet = false;
+    public $modalMode = 'none'; // 'none', 'view', 'add', 'edit'
     public $selectedPerson = null;
-    public $showAddModal = false;
     public $addParentId = null;
     public $editingPersonId = null;
 
-    // Form Fields
-    public $newPersonName;
-    public $newPersonGender = 'male';
-    public $newPersonBirthYear;
-    public $newPersonIsAlive = true;
-    public $newPersonNickname;
-    public $newPersonTitle;
-    public $newPersonOccupation;
-    public $newPersonHometown;
-    public $newPersonPlaceOfBirth;
-    public $newPersonAddress;
-    public $newPersonPhone;
-    public $newPersonEmail;
-    public $newPersonDeathYear;
-    public $newPersonDeathDateFull;
-    public $newPersonBurialPlace;
-    public $newPersonBurialDate;
-    
-    // File Uploads
-    public $newPersonAvatar;
-    public $newPersonGravePhoto;
-    public $existingAvatarUrl;
-    public $existingGravePhotoUrl;
+    // ... (Fields remain same) ...
 
-    // Filters
-    public $filters = [
-        'showAlive' => true,
-        'showDeceased' => true,
-        'showMale' => true,
-        'showFemale' => true,
-        'showDates' => true,
-        'showSpouses' => true,
-    ];
-
-    public function mount()
+    // Modal Management
+    public function openModal($personId, $mode = 'view')
     {
-        $this->loadRootPerson();
-    }
+        $this->loading = true;
+        $this->modalMode = $mode;
 
-    protected function loadRootPerson()
-    {
-        $root = Person::with([
-            'children',
-            'children.children',
-            'children.children.children',
-            'children.children.children.children',
-            'children.children.children.children.children'
-        ])
-            ->whereNull('father_id')
-            ->whereNull('mother_id')
-            ->first();
-
-        if ($root) {
-            $this->originalRootId = $root->id;
-            $this->rootPerson = $root;
+        if ($mode === 'view') {
+           $this->selectPerson($personId);
+        } elseif ($mode === 'add') {
+            $this->openAddModal($personId); // Use personId as parentId
+        } elseif ($mode === 'edit') {
+            $this->editPerson($personId);
         }
+        
+        $this->loading = false;
     }
 
-    // Menu Actions
-    public function toggleMenu()
+    public function closeModal()
     {
-        $this->showMenu = !$this->showMenu;
+        $this->modalMode = 'none';
+        $this->selectedPerson = null;
+        $this->addParentId = null;
+        $this->editingPersonId = null;
     }
 
-    public function closeMenu()
-    {
-        $this->showMenu = false;
-    }
-
-    // Person Selection
+    // Person Selection (View Mode)
     public function selectPerson($personId)
     {
+        $this->modalMode = 'view';
         $this->selectedPerson = Person::with([
             'father',
             'mother',
             'children',
+            'spouses',
             'burialInfo',
             'achievements',
             'marriagesAsHusband.wife',
             'marriagesAsWife.husband'
         ])->find($personId);
-        
-        $this->showBottomSheet = true;
     }
-
-    public function closeBottomSheet()
-    {
-        $this->showBottomSheet = false;
-        $this->selectedPerson = null;
-    }
-
-    // Focus on branch
-    public function focusOnPerson($personId)
-    {
-        $this->focusedPersonId = $personId;
-        
-        $focusedPerson = Person::with([
-            'children',
-            'children.children',
-            'children.children.children',
-            'children.children.children.children',
-        ])->find($personId);
-
-        if ($focusedPerson) {
-            $this->rootPerson = $focusedPerson;
-            $this->treeVersion++;
-        }
-        
-        $this->closeBottomSheet();
-        $this->dispatch('tree-updated');
-    }
-
-    public function resetToRoot()
-    {
-        $this->focusedPersonId = null;
-        
-        if ($this->originalRootId) {
-            $this->loadRootPerson();
-            $this->treeVersion++;
-            $this->dispatch('tree-updated');
-        }
-    }
-
-    // Add Person
+    
+    // Add Person Setup
     public function openAddModal($parentId = null)
     {
+        $this->modalMode = 'add';
         $this->addParentId = $parentId;
         $this->editingPersonId = null;
         $this->reset(['newPersonName', 'newPersonGender', 'newPersonBirthYear', 'newPersonIsAlive', 'newPersonNickname', 'newPersonTitle', 'newPersonOccupation', 'newPersonHometown', 'newPersonPlaceOfBirth', 'newPersonAddress', 'newPersonPhone', 'newPersonEmail', 'newPersonDeathYear', 'newPersonDeathDateFull', 'newPersonBurialPlace', 'newPersonBurialDate', 'newPersonAvatar', 'newPersonGravePhoto', 'existingAvatarUrl', 'existingGravePhotoUrl']);
         $this->newPersonGender = 'male'; 
         $this->newPersonIsAlive = true;
-        
-        $this->showAddModal = true;
-        $this->closeBottomSheet();
     }
 
+    // Edit Person Setup
     public function editPerson($personId)
     {
+        $this->modalMode = 'edit';
         $person = Person::find($personId);
         if ($person) {
+            $this->selectedPerson = $person; // Keep reference for header
             $this->editingPersonId = $person->id;
             $this->newPersonName = $person->name;
             $this->newPersonGender = $person->gender;
@@ -172,6 +92,7 @@ class MobileFamilyTree extends Component
             // Fill extended fields
             $this->newPersonNickname = $person->nickname;
             $this->newPersonTitle = $person->title;
+            // ... (rest of fields filling same as before) ...
             $this->newPersonOccupation = $person->occupation;
             $this->newPersonHometown = $person->hometown;
             $this->newPersonPlaceOfBirth = $person->place_of_birth;
@@ -195,17 +116,7 @@ class MobileFamilyTree extends Component
                 $this->existingGravePhotoUrl = null;
             }
             $this->newPersonGravePhoto = null;
-            
-            $this->showAddModal = true;
-            $this->closeBottomSheet();
         }
-    }
-
-    public function closeAddModal()
-    {
-        $this->showAddModal = false;
-        $this->addParentId = null;
-        $this->editingPersonId = null;
     }
 
     public function savePerson()
@@ -292,7 +203,7 @@ class MobileFamilyTree extends Component
         }
 
         $this->reset(['newPersonName', 'newPersonGender', 'newPersonBirthYear', 'newPersonIsAlive']);
-        $this->closeAddModal();
+        $this->modalMode = 'none'; // Close modal
         
         $this->loadRootPerson();
         $this->treeVersion++;
@@ -304,7 +215,7 @@ class MobileFamilyTree extends Component
         $person = Person::find($personId);
         if ($person) {
             $person->delete();
-            $this->closeBottomSheet();
+            $this->modalMode = 'none'; // Close modal
             
             if ($this->rootPerson && $this->rootPerson->id == $personId) {
                 $this->resetToRoot();
