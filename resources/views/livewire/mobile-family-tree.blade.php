@@ -139,32 +139,73 @@
                     }, 50);
                 },
 
+                pinchStartDist: 0,
+                startScale: 1,
+
                 handleTouchStart(e) {
                     if (e.touches.length === 1) {
+                        // Single finger pan
                         this.touchStartX = e.touches[0].clientX;
                         this.touchStartY = e.touches[0].clientY;
                         this.startX = this.touchStartX - this.pointX;
                         this.startY = this.touchStartY - this.pointY;
                         this.isPanning = false;
+                    } else if (e.touches.length === 2) {
+                        // Two finger pinch
+                        this.isPanning = false;
+                        this.pinchStartDist = this.getDist(e.touches);
+                        this.startScale = this.scale;
                     }
                 },
 
                 handleTouchMove(e) {
-                    if (e.touches.length !== 1) return;
-                    const touch = e.touches[0];
-                    const deltaX = Math.abs(touch.clientX - this.touchStartX);
-                    const deltaY = Math.abs(touch.clientY - this.touchStartY);
+                    // Prevent default to stop browser scrolling/zooming
+                    if (e.cancelable) e.preventDefault();
 
-                    if (deltaX > 10 || deltaY > 10) {
-                        this.isPanning = true;
-                        e.preventDefault();
-                        this.pointX = touch.clientX - this.startX;
-                        this.pointY = touch.clientY - this.startY;
+                    if (e.touches.length === 1) {
+                        // Panning
+                        const touch = e.touches[0];
+                        const deltaX = Math.abs(touch.clientX - this.touchStartX);
+                        const deltaY = Math.abs(touch.clientY - this.touchStartY);
+
+                        // Threshold to start panning
+                        if (!this.isPanning && (deltaX > 5 || deltaY > 5)) {
+                            this.isPanning = true;
+                        }
+
+                        if (this.isPanning) {
+                            this.pointX = touch.clientX - this.startX;
+                            this.pointY = touch.clientY - this.startY;
+                        }
+                    } else if (e.touches.length === 2) {
+                        // Zooming
+                        const dist = this.getDist(e.touches);
+                        // Prevent accidental tiny jitters
+                        if (Math.abs(dist - this.pinchStartDist) > 10) {
+                            const ratio = dist / this.pinchStartDist;
+                            let newScale = this.startScale * ratio;
+                            // Clamp scale
+                            newScale = Math.min(Math.max(newScale, 0.3), 3.0);
+
+                            this.scale = newScale;
+                            if (this.jsPlumbInstance) this.jsPlumbInstance.setZoom(this.scale);
+                        }
                     }
                 },
 
                 handleTouchEnd(e) {
                     this.isPanning = false;
+                    // Reset pinch state if fingers lift
+                    if (e.touches.length < 2) {
+                        this.pinchStartDist = 0;
+                    }
+                },
+
+                getDist(touches) {
+                    return Math.hypot(
+                        touches[0].clientX - touches[1].clientX,
+                        touches[0].clientY - touches[1].clientY
+                    );
                 },
 
                 zoomIn() {
@@ -217,14 +258,24 @@
                         }
                     }, 500);
                 }
+                handleTreeUpdate(focusNodeId) {
+                    setTimeout(() => {
+                        this.drawConnections();
+                        if (focusNodeId) {
+                            this.centerOnNode(focusNodeId);
+                        } else {
+                            this.centerRoot();
+                        }
+                    }, 100);
+                }
             }));
         });
     </script>
 
-    <div class="flex-1 overflow-hidden relative" x-data="mobileFamilyTreeLogic" @touchstart.passive="handleTouchStart($event)"
-        @touchmove="handleTouchMove($event)" @touchend.passive="handleTouchEnd($event)"
-        @center-on-node.window="centerOnNode($event.detail.nodeId)"
-        @tree-updated.window="setTimeout(() => { drawConnections(); centerRoot(); }, 100)" style="touch-action: none;">
+    <div class="h-full w-full flex-1 overflow-hidden relative" x-data="mobileFamilyTreeLogic"
+        @touchstart.passive="handleTouchStart($event)" @touchmove="handleTouchMove($event)"
+        @touchend.passive="handleTouchEnd($event)" @center-on-node.window="centerOnNode($event.detail.nodeId)"
+        @tree-updated.window="handleTreeUpdate($event.detail.focusNodeId)" style="touch-action: none;">
 
         {{-- Tree Content - Centered horizontally --}}
         <div id="mobile-tree-content" wire:ignore

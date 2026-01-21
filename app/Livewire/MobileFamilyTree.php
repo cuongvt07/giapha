@@ -3,10 +3,12 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use App\Models\Person;
 
 class MobileFamilyTree extends Component
 {
+    use WithFileUploads;
     // Tree Data
     public $rootPerson;
     public $focusedPersonId = null;
@@ -26,6 +28,24 @@ class MobileFamilyTree extends Component
     public $newPersonGender = 'male';
     public $newPersonBirthYear;
     public $newPersonIsAlive = true;
+    public $newPersonNickname;
+    public $newPersonTitle;
+    public $newPersonOccupation;
+    public $newPersonHometown;
+    public $newPersonPlaceOfBirth;
+    public $newPersonAddress;
+    public $newPersonPhone;
+    public $newPersonEmail;
+    public $newPersonDeathYear;
+    public $newPersonDeathDateFull;
+    public $newPersonBurialPlace;
+    public $newPersonBurialDate;
+    
+    // File Uploads
+    public $newPersonAvatar;
+    public $newPersonGravePhoto;
+    public $existingAvatarUrl;
+    public $existingGravePhotoUrl;
 
     // Filters
     public $filters = [
@@ -131,7 +151,7 @@ class MobileFamilyTree extends Component
     {
         $this->addParentId = $parentId;
         $this->editingPersonId = null;
-        $this->reset(['newPersonName', 'newPersonGender', 'newPersonBirthYear', 'newPersonIsAlive']);
+        $this->reset(['newPersonName', 'newPersonGender', 'newPersonBirthYear', 'newPersonIsAlive', 'newPersonNickname', 'newPersonTitle', 'newPersonOccupation', 'newPersonHometown', 'newPersonPlaceOfBirth', 'newPersonAddress', 'newPersonPhone', 'newPersonEmail', 'newPersonDeathYear', 'newPersonDeathDateFull', 'newPersonBurialPlace', 'newPersonBurialDate', 'newPersonAvatar', 'newPersonGravePhoto', 'existingAvatarUrl', 'existingGravePhotoUrl']);
         $this->newPersonGender = 'male'; 
         $this->newPersonIsAlive = true;
         
@@ -148,6 +168,33 @@ class MobileFamilyTree extends Component
             $this->newPersonGender = $person->gender;
             $this->newPersonBirthYear = $person->birth_year;
             $this->newPersonIsAlive = (bool)$person->is_alive;
+            
+            // Fill extended fields
+            $this->newPersonNickname = $person->nickname;
+            $this->newPersonTitle = $person->title;
+            $this->newPersonOccupation = $person->occupation;
+            $this->newPersonHometown = $person->hometown;
+            $this->newPersonPlaceOfBirth = $person->place_of_birth;
+            $this->newPersonAddress = $person->address;
+            $this->newPersonPhone = $person->phone;
+            $this->newPersonEmail = $person->email;
+            $this->newPersonDeathYear = $person->death_year;
+            
+            // Files
+            $this->existingAvatarUrl = $person->avatar_url;
+            $this->newPersonAvatar = null;
+            
+            // Burial
+            if ($person->burialInfo) {
+                $this->newPersonBurialPlace = $person->burialInfo->burial_place;
+                $this->newPersonBurialDate = $person->burialInfo->burial_date;
+                $this->existingGravePhotoUrl = $person->burialInfo->grave_photo_path;
+            } else {
+                $this->newPersonBurialPlace = null;
+                $this->newPersonBurialDate = null;
+                $this->existingGravePhotoUrl = null;
+            }
+            $this->newPersonGravePhoto = null;
             
             $this->showAddModal = true;
             $this->closeBottomSheet();
@@ -182,6 +229,31 @@ class MobileFamilyTree extends Component
         $person->gender = $this->newPersonGender;
         $person->birth_year = $this->newPersonBirthYear;
         $person->is_alive = $this->newPersonIsAlive;
+        
+        // Extended fields
+        $person->nickname = $this->newPersonNickname;
+        $person->title = $this->newPersonTitle;
+        $person->occupation = $this->newPersonOccupation;
+        $person->hometown = $this->newPersonHometown;
+        $person->place_of_birth = $this->newPersonPlaceOfBirth;
+        $person->address = $this->newPersonAddress;
+        $person->phone = $this->newPersonPhone;
+        $person->email = $this->newPersonEmail;
+
+        if ($this->newPersonIsAlive) {
+            $person->death_year = null;
+            $person->date_of_death = null;
+        } else {
+            $person->death_year = $this->newPersonDeathYear;
+             // If full date is provided, it might override death_year logic in model, but for now specific mapping
+             // Assuming model uses death_year for display mostly
+        }
+        
+        // Avatar Upload
+        if ($this->newPersonAvatar) {
+            $path = $this->newPersonAvatar->store('avatars', 'public');
+            $person->avatar_url = '/storage/' . $path;
+        }
 
         // Relation logic only for new person
         if (!$this->editingPersonId && $this->addParentId) {
@@ -196,6 +268,24 @@ class MobileFamilyTree extends Component
         }
 
         $person->save();
+        
+        // Burial Info Saving
+        if (!$this->newPersonIsAlive && ($this->newPersonBurialPlace || $this->newPersonBurialDate || $this->newPersonGravePhoto)) {
+             $burialData = [
+                'burial_place' => $this->newPersonBurialPlace,
+                'burial_date' => $this->newPersonBurialDate,
+            ];
+
+            if ($this->newPersonGravePhoto) {
+                $path = $this->newPersonGravePhoto->store('burial_photos', 'public');
+                $burialData['grave_photo_path'] = '/storage/' . $path;
+            }
+
+            $person->burialInfo()->updateOrCreate(
+                ['person_id' => $person->id],
+                $burialData
+            );
+        }
 
         if ($this->editingPersonId) {
              $this->selectedPerson = $person->fresh(); // Update selected person view if open
@@ -206,7 +296,7 @@ class MobileFamilyTree extends Component
         
         $this->loadRootPerson();
         $this->treeVersion++;
-        $this->dispatch('tree-updated');
+        $this->dispatch('tree-updated', focusNodeId: 'node-' . $person->id);
     }
 
     public function deletePerson($personId)

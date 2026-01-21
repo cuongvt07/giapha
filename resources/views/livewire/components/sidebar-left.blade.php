@@ -1,21 +1,39 @@
 <div wire:ignore.self
-    class="h-full flex flex-col bg-white shadow-xl border-r border-gray-200 transition-all duration-300 ease-in-out z-[100]
-           fixed inset-y-0 left-0"
+    class="h-full flex flex-col bg-white shadow-xl border-r border-gray-200 transition-transform duration-300 ease-in-out z-[100]
+           fixed inset-y-0 left-0 w-80"
     style="touch-action: auto;" x-data="{
-        collapsed: $persist(true).as('sidebar-collapsed'),
+        collapsed: $persist(false).as('sidebar-collapsed'),
         openFilters: true,
         openStats: true,
         toggle() {
-            console.log('Sidebar toggled, collapsed was:', this.collapsed);
             this.collapsed = !this.collapsed;
-            console.log('Sidebar collapsed is now:', this.collapsed);
-            console.log('Element classes will be:', this.collapsed ? '-translate-x-full' : 'translate-x-0 w-80');
         }
     }" @toggle-sidebar.window="toggle()"
-    :style="collapsed ? 'transform: translateX(-100%); width: 0;' : 'transform: translateX(0); width: 20rem;'">
+    :class="collapsed ? '-translate-x-full' : 'translate-x-0'">
 
-    {{-- Mobile overlay backdrop (now inside x-data scope) --}}
-    <div class="lg:hidden fixed inset-0 bg-black/50 z-30 transition-opacity -ml-80" x-show="!collapsed"
+    {{-- Toggle Button (Desktop only) --}}
+    <button @click="toggle()"
+        class="hidden lg:flex absolute top-3 -right-8 w-8 h-8 bg-white border border-gray-100 shadow-sm rounded-r-md items-center justify-center text-gray-400 hover:text-[#C41E3A] focus:outline-none transition-all duration-300 z-50 group hover:w-10 overflow-visible"
+        title="Ẩn/Hiện Menu">
+        <template x-if="!collapsed">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4 transform group-hover:-translate-x-1 transition-transform" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+            </svg>
+        </template>
+        <template x-if="collapsed">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4 transform group-hover:translate-x-1 transition-transform" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            </svg>
+        </template>
+    </button>
+
+    {{-- Mobile overlay backdrop --}}
+    <div class="lg:hidden fixed inset-0 bg-black/50 z-30 transition-opacity" x-show="!collapsed"
         x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" @click="collapsed = true"
@@ -29,22 +47,20 @@
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
-            <h2 class="font-bold text-lg font-serif tracking-wide whitespace-nowrap transition-opacity duration-200"
-                x-show="!collapsed" x-transition>Gia Phả Việt</h2>
+            <h2 class="font-bold text-lg font-serif tracking-wide whitespace-nowrap">Gia Phả Việt</h2>
         </div>
-        <button @click="toggle()" class="p-1.5 hover:bg-white/20 rounded-lg transition-colors flex-shrink-0"
-            :title="collapsed ? 'Mở rộng' : 'Thu gọn'">
+        {{-- Internal toggle button kept for mobile or alternative usage --}}
+        <button @click="toggle()" class="lg:hidden p-1.5 hover:bg-white/20 rounded-lg transition-colors flex-shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    :d="collapsed ? 'M13 5l7 7-7 7M5 5l7 7-7 7' : 'M11 19l-7-7 7-7m8 14l-7-7 7-7'" />
+                    d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
             </svg>
         </button>
     </div>
 
-    <!-- Navigation Menu (Compact) - Hidden when collapsed -->
-    <div class="flex border-b border-gray-100 bg-gray-50 transition-opacity duration-200" x-show="!collapsed"
-        x-transition>
+    <!-- Navigation Menu (Compact) -->
+    <div class="flex border-b border-gray-100 bg-gray-50">
         <button class="flex-1 py-3 text-xs font-bold text-[#C41E3A] border-b-2 border-[#C41E3A] bg-white">
             <span class="block mb-1 text-lg">🌳</span>
             Cây Gia Phả
@@ -61,9 +77,9 @@
         </button>
     </div>
 
-    <!-- Scrollable Content - Hidden when collapsed -->
-    <div class="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar transition-opacity duration-200"
-        x-show="!collapsed" x-transition>
+    <!-- Scrollable Content -->
+    <div class="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
+
 
         <!-- SEARCH SEARCH PANEL -->
         <div class="relative z-50">
@@ -136,7 +152,8 @@
                     <span class="w-1 h-4 bg-[#FFD700] rounded-full"></span>
                     Tổng Quan
                 </h3>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 transition-transform duration-200"
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4 text-gray-400 transition-transform duration-200"
                     :class="openStats ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd"
                         d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414z"
@@ -385,35 +402,10 @@
         </div>
     </div>
 
-    {{-- Footer Branding - Hidden when collapsed or on mobile --}}
-    <div class="hidden lg:block p-3 border-t border-gray-100 bg-gray-50 text-center transition-opacity duration-200"
-        x-show="!collapsed" x-transition>
+    {{-- Footer Branding --}}
+    <div class="hidden lg:block p-3 border-t border-gray-100 bg-gray-50 text-center">
         <p class="text-[10px] text-gray-400">© 2026 Hệ Thống Gia Phả Số</p>
     </div>
 
-    {{-- Collapsed Mode - Icon-Only Quick Actions (Desktop only) --}}
-    <div class="hidden lg:flex flex-1 flex-col items-center justify-center gap-6 py-6" x-show="collapsed"
-        x-transition>
-        {{-- Expand Button --}}
-        <button @click="toggle()" class="p-3 hover:bg-gray-100 rounded-lg transition-colors group"
-            title="Mở rộng sidebar">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 group-hover:text-[#C41E3A]"
-                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-            </svg>
-        </button>
 
-        {{-- Quick Stats Icons --}}
-        <div class="flex flex-col items-center gap-4">
-            <div class="text-center" title="Tổng thành viên">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#C41E3A] mx-auto mb-1"
-                    viewBox="0 0 20 20" fill="currentColor">
-                    <path
-                        d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                </svg>
-                <p class="text-xs font-bold text-gray-700">{{ $stats['total_members'] }}</p>
-            </div>
-        </div>
-    </div>
 </div>
