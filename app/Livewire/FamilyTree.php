@@ -36,6 +36,12 @@ class FamilyTree extends Component
     
     public function mount()
     {
+        // Mobile Redirect Logic
+        $userAgent = strtolower(request()->header('User-Agent'));
+        if (preg_match('/(android|webos|iphone|ipad|ipod|blackberry|windows phone)/i', $userAgent)) {
+            return redirect()->route('mobile.tree');
+        }
+
         // Get the original root person
         $originalRoot = Person::with([
             'children',
