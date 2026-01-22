@@ -127,7 +127,10 @@ class Person extends Model
 
     public function children()
     {
-        return $this->hasMany(Person::class, 'father_id')
+        // Dynamic foreign key based on gender
+        $foreignKey = $this->gender === 'female' ? 'mother_id' : 'father_id';
+        
+        return $this->hasMany(Person::class, $foreignKey)
                     ->orderBy('order', 'asc')
                     ->orderBy('date_of_birth', 'asc');
     }
