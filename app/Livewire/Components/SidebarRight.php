@@ -278,7 +278,7 @@ class SidebarRight extends Component
 
             // Reload to show updated info
             $this->loadPerson($this->personId);
-            $this->dispatch('refreshTree')->to('family-tree');
+            $this->dispatch('tree-entity-saved', personId: $this->personId)->to('family-tree');
         }
     }
 
@@ -340,7 +340,7 @@ class SidebarRight extends Component
         }
 
         $this->loadPerson($newPerson->id);
-        $this->dispatch('refreshTree')->to('family-tree');
+        $this->dispatch('tree-entity-saved', personId: $newPerson->id)->to('family-tree');
     }
 
     public function deletePerson()

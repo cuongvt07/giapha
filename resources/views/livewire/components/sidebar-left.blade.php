@@ -12,21 +12,21 @@
     :class="collapsed ? '-translate-x-full' : 'translate-x-0'">
 
     {{-- Toggle Button (Desktop only) --}}
+    {{-- Toggle Button (Desktop only) --}}
     <button @click="toggle()"
-        class="hidden lg:flex absolute top-3 -right-8 w-8 h-8 bg-white border border-gray-100 shadow-sm rounded-r-md items-center justify-center text-gray-400 hover:text-[#C41E3A] focus:outline-none transition-all duration-300 z-50 group hover:w-10 overflow-visible"
+        class="hidden lg:flex absolute top-3 -right-8 w-8 h-8 bg-white border border-gray-100 shadow-sm rounded-r-md items-center justify-center text-gray-400 hover:text-primary-600 focus:outline-none transition-all duration-300 z-50 group hover:w-10 overflow-visible"
         title="Ẩn/Hiện Menu">
+        
+        {{-- If NOT Collapsed (Open) -> Show Left Arrows (Collapse) --}}
         <template x-if="!collapsed">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4 transform group-hover:-translate-x-1 transition-transform" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
             </svg>
         </template>
+
+        {{-- If Collapsed (Closed) -> Show Right Arrows (Expand) --}}
         <template x-if="collapsed">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4 transform group-hover:translate-x-1 transition-transform" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
             </svg>
         </template>

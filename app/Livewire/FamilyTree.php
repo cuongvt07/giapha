@@ -27,7 +27,20 @@ class FamilyTree extends Component
         // 'refreshTree' => '$refresh', // Disabled to prevent flickering
         'filters-updated' => 'updateFilters',
         'focus-on-branch' => 'focusOnPerson',
+        'tree-entity-saved' => 'onTreeEntitySaved',
     ];
+
+    public function onTreeEntitySaved($personId)
+    {
+        // Refresh root to ensure fresh data (especially if children relation was cached)
+        if ($this->rootPerson) {
+             $this->rootPerson->refresh();
+        }
+        
+        // Dispatch browser event to center on the new/updated node
+        // We add a small delay to ensure DOM is updated first (handled by Livewire usually, but Alpine might need a tick)
+        $this->dispatch('center-on-node', ['nodeId' => 'node-' . $personId]);
+    }
 
     public function updateFilters($filters)
     {
@@ -43,14 +56,7 @@ class FamilyTree extends Component
         }
 
         // Get the original root person
-        $originalRoot = Person::with([
-            'children',
-            'children.children',
-            'children.children.children',
-            'children.children.children.children',
-            'children.children.children.children.children'
-        ])
-            ->whereNull('father_id')
+        $originalRoot = Person::whereNull('father_id')
             ->whereNull('mother_id')
             ->first();
 
@@ -66,13 +72,9 @@ class FamilyTree extends Component
         
         // Load the focused person as the NEW ROOT - only load descendants, not ancestors
         // This makes them the "top" of the tree
-        $focusedPerson = Person::with([
-            'children',
-            'children.children',
-            'children.children.children',
-            'children.children.children.children',
-            'children.children.children.children.children'
-        ])->find($personId);
+        // Load the focused person as the NEW ROOT - only load descendants, not ancestors
+        // This makes them the "top" of the tree
+        $focusedPerson = Person::find($personId);
 
         if ($focusedPerson) {
             $this->rootPerson = $focusedPerson;
@@ -90,13 +92,7 @@ class FamilyTree extends Component
         
         // Reload original root
         if ($this->originalRootId) {
-            $this->rootPerson = Person::with([
-                'children',
-                'children.children',
-                'children.children.children',
-                'children.children.children.children',
-                'children.children.children.children.children'
-            ])->find($this->originalRootId);
+            $this->rootPerson = Person::find($this->originalRootId);
         }
 
         // Dispatch event to frontend to re-center view

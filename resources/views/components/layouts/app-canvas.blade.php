@@ -47,8 +47,8 @@
 <body class="bg-gray-50 font-sans text-gray-900 antialiased h-full w-full relative overflow-hidden">
 
     <!-- Top Navigation Bar -->
-    <header
-        class="absolute top-0 left-0 right-0 h-14 bg-white/90 backdrop-blur-sm border-b border-gray-200 z-40 hidden lg:flex items-center justify-between px-4 shadow-sm">
+    <!-- Top Navigation Bar (Hidden per user request - accounts pending) -->
+    <header class="hidden absolute top-0 left-0 right-0 h-14 bg-white/90 backdrop-blur-sm border-b border-gray-200 z-40 lg:flex items-center justify-between px-4 shadow-sm" style="display: none !important;">
         <div class="flex items-center gap-3">
             <div
                 class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center text-white font-bold text-lg font-serif">
@@ -82,7 +82,7 @@
     </header>
 
     <!-- Main Content Area -->
-    <main class="absolute inset-0 top-0 lg:top-14 z-0">
+    <main class="absolute inset-0 top-0 z-0">
         {{ $slot }}
     </main>
 

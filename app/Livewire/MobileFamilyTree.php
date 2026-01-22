@@ -32,11 +32,7 @@ class MobileFamilyTree extends Component
         $root = Person::with([
             'father',
             'mother',
-            'children',
-            'children.children',
-            'children.children.children',
-             // Load deep enough for initial view, subsequent loads can be dynamic or on demand
-            // Re-adding relations safely based on previous fix
+             // Children loaded lazily via attribute
              'marriagesAsHusband.wife',
              'marriagesAsWife.husband',
              'burialInfo'
@@ -139,7 +135,7 @@ class MobileFamilyTree extends Component
         $this->selectedPerson = Person::with([
             'father',
             'mother',
-            'children',
+            // Children loaded lazily
             'burialInfo',
             'achievements',
             'marriagesAsHusband.wife',

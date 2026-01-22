@@ -125,14 +125,22 @@ class Person extends Model
         return $spouses->unique('id');
     }
 
+    // Accessor to get children from EITHER father OR mother
+    // This allows the tree to traverse down regardless of gender
+    public function getChildrenAttribute()
+    {
+        return Person::where('father_id', $this->id)
+                     ->orWhere('mother_id', $this->id)
+                     ->orderBy('order', 'asc')
+                     ->orderBy('date_of_birth', 'asc')
+                     ->get();
+    }
+
+    // Keep strict relationship for eager loading compatibility
+    // This prevents "undefined relationship" errors if with('children') is called
     public function children()
     {
-        // Dynamic foreign key based on gender
-        $foreignKey = $this->gender === 'female' ? 'mother_id' : 'father_id';
-        
-        return $this->hasMany(Person::class, $foreignKey)
-                    ->orderBy('order', 'asc')
-                    ->orderBy('date_of_birth', 'asc');
+        return $this->hasMany(Person::class, 'father_id');
     }
 
     // ... rest of accessors ...
@@ -211,10 +219,7 @@ class Person extends Model
                 'father.mother',
                 'mother.father',
                 'mother.mother',
-                'children',
-                'children.children',
-                'children.children.children',
-                'children.children.children.children',
+                // Children removed to use lazy loading via getChildrenAttribute
             ]);
     }
 

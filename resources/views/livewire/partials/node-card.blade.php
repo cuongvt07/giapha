@@ -14,86 +14,163 @@
         }
     }
 
-    // Generation 1 (Thủy Tổ): Most Sacred - HORIZONTAL
+    // Generation 1 (Thủy Tổ): nencuto.png - Red BG - Gold Text
     if ($generationLevel == 1) {
-        $cardWidth = 'min-w-[16rem] w-auto max-w-sm'; // Allow grow
-        $cardPadding = 'p-3';
+        $cardWidth = 'min-w-[32rem] w-auto max-w-4xl'; // Significantly wider to prevent text overlap
+        $cardPadding = 'pt-14 pb-14 px-32'; // Increased horizontal padding slightly 
+        $avatarSize = 'w-28 h-28'; // Larger avatar
+        $avatarIcon = 'h-14 w-14';
+        $nameSize = 'text-5xl'; // Larger text
+        $yearSize = 'text-2xl';
+        
+        $borderWidth = 'border-0'; 
+        $borderColor = 'border-transparent';
+        
+        // Solid Red background
+        $bgOverride = 'bg-no-repeat bg-[length:100%_100%] text-[#FFD700]'; 
+        $customStyle = "background-image: url('" . asset('images/nencuto.png') . "'); background-color: #8B0000;";
+        
+        $topBorderColor = 'border-t-0';
+        $ringClass = ''; 
+        $shadowClass = 'drop-shadow-2xl';
+        $decorativeClass = 'ancestor-card relative overflow-visible';
+        
+        $nameClass = 'font-serif font-black text-[#FFD700] uppercase tracking-widest text-center drop-shadow-md';
+        $yearClass = 'font-bold text-[#FFA000] text-center';
+        $layoutHorizontal = true;
+    }
+    // Generation 2: nento1.png - Red BG (Same as Gen 1) - Gold Text
+    elseif ($generationLevel == 2) {
+        $cardWidth = 'min-w-[22rem] w-auto max-w-xl';
+        $cardPadding = 'pt-10 pb-6 px-18'; 
+        $avatarSize = 'w-20 h-20';
+        $avatarIcon = 'h-10 w-10';
+        $nameSize = 'text-4xl'; 
+        $yearSize = 'text-xl';
+        
+        $borderWidth = 'border-0';
+        $borderColor = 'border-transparent';
+        
+        // Solid Deep Red (Match Gen 1)
+        $bgOverride = 'bg-no-repeat bg-[length:100%_100%] text-[#FFD700]'; 
+        $customStyle = "background-image: url('" . asset('images/nento1.png') . "'); background-color: #8B0000;";
+        
+        $topBorderColor = 'border-t-0';
+        $ringClass = '';
+        $shadowClass = 'drop-shadow-xl';
+        $decorativeClass = 'relative overflow-visible';
+        
+        // Gold Text (#FFD700) for high contrast on #8B0000
+        $nameClass = 'font-serif font-black text-[#FFD700] uppercase tracking-wide text-center drop-shadow-sm'; 
+        $yearClass = 'font-bold text-[#FFA000] text-center';
+        $layoutHorizontal = true;
+    }
+    // Generation 3, 4, 5: Always Horizontal - nendoi.png
+    elseif ($generationLevel >= 3 && $generationLevel <= 5) {
+        $cardWidth = 'min-w-[18rem] w-auto max-w-md';
+        $cardPadding = 'pt-8 pb-6 px-8';
         $avatarSize = 'w-16 h-16';
         $avatarIcon = 'h-8 w-8';
-        $nameSize = 'text-base';
-        $yearSize = 'text-sm';
-        $borderWidth = 'border-[4px]';
-        $borderColor = 'border-red-700';
-        $shadowClass = 'shadow-xl shadow-red-900/40';
-        $bgOverride = 'bg-gradient-to-br from-amber-50 via-yellow-100 to-amber-100';
-        $topBorderColor = 'border-t-[6px] border-t-red-700';
-        $ringClass = 'ring-4 ring-yellow-400 ring-offset-2 ring-offset-red-800';
-        $decorativeClass = 'ancestor-card';
-        $nameClass = 'font-bold text-red-900 tracking-wide text-center';
-        $yearClass = 'font-semibold text-red-800 text-center';
-        $layoutHorizontal = true;
-    }
-    // Generation 2: High Prestige - HORIZONTAL
-    elseif ($generationLevel == 2) {
-        $cardWidth = 'min-w-[14rem] w-auto max-w-xs';
-        $cardPadding = 'p-2.5';
-        $avatarSize = 'w-14 h-14';
-        $avatarIcon = 'h-7 w-7';
-        $nameSize = 'text-sm';
-        $yearSize = 'text-xs';
-        $borderWidth = 'border-[3px]';
-        $borderColor = 'border-yellow-600';
-        $shadowClass = 'shadow-lg shadow-yellow-700/30';
-        $bgOverride = 'bg-gradient-to-br from-yellow-50 to-amber-100';
-        $topBorderColor = 'border-t-4 border-t-yellow-600';
-        $ringClass = 'ring-2 ring-yellow-300';
-        $decorativeClass = '';
-        $nameClass = 'font-bold text-yellow-900 text-center';
-        $yearClass = 'font-semibold text-yellow-800 text-center';
-        $layoutHorizontal = true;
-    }
-    // Generation 3: Respected - Horizontal
-    elseif ($generationLevel == 3) {
-        $cardWidth = 'min-w-[12rem] w-auto max-w-xs';
-        $cardPadding = 'p-2';
-        $avatarSize = 'w-12 h-12';
-        $avatarIcon = 'h-6 w-6';
-        $nameSize = 'text-sm';
-        $yearSize = 'text-xs';
-        $borderWidth = 'border-2';
-        $borderColor = 'border-amber-500';
-        $shadowClass = 'shadow-md shadow-amber-600/20';
-        $bgOverride = 'bg-gradient-to-br from-amber-50 to-yellow-50';
-        $topBorderColor = 'border-t-[3px] border-t-amber-500';
-        $ringClass = 'ring-1 ring-amber-200';
-        $decorativeClass = '';
-        $nameClass = 'font-bold text-amber-900 text-center';
-        $yearClass = 'font-medium text-amber-700 text-center';
-        $layoutHorizontal = true;
-        $layoutVerticalText = false;
-    }
-    // Generation 4+: VERTICAL TEXT layout (like traditional gia pha)
-    else {
-        $cardWidth = '';
-        $cardPadding = 'px-1.5 py-2';
-        $avatarSize = 'w-8 h-8';
-        $avatarIcon = 'h-4 w-4';
-        $nameSize = 'text-xs';
-        $yearSize = 'text-[10px]';
-        $borderWidth = 'border-2';
-        $borderColor = $person->gender === 'male' ? 'border-blue-400' : 'border-pink-400';
-        $shadowClass = 'shadow-md hover:shadow-lg';
-        $bgOverride =
-            $person->gender === 'male'
-                ? 'bg-gradient-to-b from-blue-50 to-blue-100'
-                : 'bg-gradient-to-b from-pink-50 to-pink-100';
-        $topBorderColor = $person->is_alive ? 'border-t-[3px] border-t-green-500' : 'border-t-[3px] border-t-gray-400';
+        $nameSize = 'text-2xl';
+        $yearSize = 'text-base';
+        
+        $borderWidth = 'border-0';
+        $borderColor = 'border-transparent';
+        
+        // Gender Styling
+        if ($person->gender === 'female') {
+            $bgColor = '#FFB6C1'; // Light Pink
+            $textColor = '#800000'; // Dark Red
+            // Optional: CSS filter to shift frame color if needed
+            $filterStyle = ""; 
+        } else {
+            $bgColor = '#FFCC00'; // Yellow
+            $textColor = '#800000';
+            $filterStyle = "";
+        }
+        
+        // nendoi.png
+        $bgOverride = "bg-no-repeat bg-[length:100%_100%] text-[{$textColor}]"; 
+        $customStyle = "background-image: url('" . asset('images/nendoi.png') . "'); background-color: {$bgColor}; {$filterStyle}";
+        
+        $topBorderColor = 'border-t-0';
         $ringClass = '';
-        $decorativeClass = '';
-        $nameClass = $person->gender === 'male' ? 'font-bold text-blue-900' : 'font-bold text-pink-900';
-        $yearClass = 'font-semibold text-gray-700';
-        $layoutHorizontal = false;
-        $layoutVerticalText = true;
+        $shadowClass = 'drop-shadow-lg';
+        $decorativeClass = 'relative overflow-visible';
+        
+        $nameClass = "font-serif font-black text-[{$textColor}] uppercase tracking-wide text-center";
+        $yearClass = 'font-bold text-[#A52A2A] text-center';
+        $layoutHorizontal = true;
+    }
+    // Generation 6+: Conditional Vertical
+    else {
+        // Count Siblings
+        $siblingsCount = 0;
+        if ($person->father_id) {
+            $siblingsCount = \App\Models\Person::where('father_id', $person->father_id)->count();
+        } elseif ($person->mother_id) {
+             $siblingsCount = \App\Models\Person::where('mother_id', $person->mother_id)->count();
+        }
+
+        // CROWDED SIBLINGS (>= 4) OR GENERATION 7+ -> VERTICAL LAYOUT
+        if ($generationLevel >= 7 || $siblingsCount >= 4) {
+             $cardWidth = 'min-w-[4rem]'; // Wider vertical cards
+             $cardPadding = 'px-3 py-3';
+             $avatarSize = 'w-10 h-10'; // Larger vertical avatar
+             $avatarIcon = 'h-5 w-5';
+             $nameSize = 'text-sm font-bold'; // Larger vertical text
+             $yearSize = 'text-xs';
+             $borderWidth = 'border-2';
+             $borderColor = $person->gender === 'male' ? 'border-blue-400' : 'border-pink-400';
+             $shadowClass = 'shadow-md hover:shadow-lg';
+             $bgOverride =
+                 $person->gender === 'male'
+                     ? 'bg-gradient-to-b from-blue-50 to-blue-100'
+                     : 'bg-gradient-to-b from-pink-50 to-pink-100';
+             $topBorderColor = $person->is_alive ? 'border-t-[3px] border-t-green-500' : 'border-t-[3px] border-t-gray-400';
+             $ringClass = '';
+             $decorativeClass = '';
+             
+             $nameClass = ($person->gender === 'male' ? 'font-bold text-blue-900' : 'font-bold text-pink-900') . ' uppercase';
+             $yearClass = 'font-semibold text-gray-700';
+             $layoutHorizontal = false;
+             $layoutVerticalText = true;
+        } 
+        // SPACIOUS (< 4) -> HORIZONTAL LAYOUT (Like Gen 3-5 but slightly smaller)
+        else {
+             $cardWidth = 'min-w-[16rem] w-auto max-w-sm';
+             $cardPadding = 'pt-6 pb-4 px-6'; 
+             $avatarSize = 'w-14 h-14';
+             $avatarIcon = 'h-7 w-7';
+             $nameSize = 'text-xl';
+             $yearSize = 'text-sm';
+             
+             $borderWidth = 'border-0';
+             $borderColor = 'border-transparent';
+             
+             // Gender Styling
+            if ($person->gender === 'female') {
+                $bgColor = '#FFB6C1'; // Light Pink
+                $textColor = '#800000';
+            } else {
+                $bgColor = '#FFCC00'; // Yellow
+                $textColor = '#800000';
+            }
+             
+             // nendoi.png style
+             $bgOverride = "bg-no-repeat bg-[length:100%_100%] text-[{$textColor}]"; 
+             $customStyle = "background-image: url('" . asset('images/nendoi.png') . "'); background-color: {$bgColor};";
+             
+             $topBorderColor = 'border-t-0';
+             $ringClass = '';
+             $shadowClass = 'drop-shadow-md';
+             $decorativeClass = 'relative overflow-visible';
+             
+             $nameClass = "font-serif font-black text-[{$textColor}] uppercase tracking-wide text-center";
+             $yearClass = 'font-bold text-[#A52A2A] text-center';
+             $layoutHorizontal = true;
+             $layoutVerticalText = false;
+        }
     }
 
     // Visibility Logic
@@ -137,19 +214,28 @@
         @if (isset($filters['focusedPersonId']) && $filters['focusedPersonId'] == $person->id) !border-purple-500 !border-[3px] !ring-2 !ring-purple-300 @endif">
 
         @if ($generationLevel == 1)
-            <!-- Decorative Corner Ornaments for Ancestor -->
-            <div class="absolute -top-1 -left-1 w-5 h-5 border-t-3 border-l-3 border-yellow-500 rounded-tl-md"></div>
-            <div class="absolute -top-1 -right-1 w-5 h-5 border-t-3 border-r-3 border-yellow-500 rounded-tr-md"></div>
-            <div class="absolute -bottom-1 -left-1 w-5 h-5 border-b-3 border-l-3 border-yellow-500 rounded-bl-md"></div>
-            <div class="absolute -bottom-1 -right-1 w-5 h-5 border-b-3 border-r-3 border-yellow-500 rounded-br-md">
-            </div>
+             <!-- Crown removed as per user request -->
+        @endif
+        
+        @if (isset($rotateFrame) && $rotateFrame)
+             <!-- Solid Yellow Base -->
+             <div class="absolute inset-0 z-0 bg-[#FFCC00]"></div>
+             <!-- Rotated nendoi.png Frame -->
+             <div class="absolute inset-0 z-0 flex items-center justify-center overflow-hidden">
+                 <img src="{{ asset('images/nendoi.png') }}" class="rotate-90 min-w-[150%] min-h-[150%] object-fill opacity-90">
+             </div>
+        @endif
+        
+        @if ($generationLevel == 2)
+             <!-- Custom decorative elements for Gen 2 if needed later -->
         @endif
 
         <!-- Primary Person Card -->
         @if ($layoutHorizontal)
             {{-- HORIZONTAL LAYOUT for Gen 1-2 --}}
             <div
-                class="{{ $cardWidth }} flex items-center gap-2 {{ $cardPadding }} pb-3 relative {{ $bgOverride }} {{ $topBorderColor }} {{ $statusClass }}">
+                class="{{ $cardWidth }} flex items-center gap-2 {{ $cardPadding }} pb-3 relative {{ $bgOverride }} {{ $topBorderColor }} {{ $statusClass }}"
+                style="{{ $customStyle ?? '' }}">
 
                 @if (!$person->is_alive)
                     <div class="absolute top-1 right-1 w-1.5 h-1.5 bg-gray-500 rounded-full" title="Đã mất"></div>
