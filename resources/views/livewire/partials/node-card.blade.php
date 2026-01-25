@@ -197,9 +197,9 @@
 @endphp
 
 <div class="group relative flex flex-col items-center cursor-pointer transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 z-10 focus:outline-none focus:ring-2 focus:ring-primary-400 rounded-xl"
-    tabindex="0" @keydown.enter.prevent="$dispatch('person-selected', { id: {{ $person->id }} })"
-    @keydown.space.prevent="$dispatch('person-selected', { id: {{ $person->id }} })"
-    wire:click="$dispatch('person-selected', { id: {{ $person->id }} })">
+    tabindex="0" @keydown.enter.prevent="Livewire.dispatch('person-selected', { id: {{ $person->id }} })"
+    @keydown.space.prevent="Livewire.dispatch('person-selected', { id: {{ $person->id }} })"
+    @click="Livewire.dispatch('person-selected', { id: {{ $person->id }} })">
 
     <!-- Connector Point Top -->
     <div
@@ -210,7 +210,7 @@
     <div id="node-{{ $person->id }}"
         @if ($person->father_id) data-parent-id="node-{{ $person->father_id }}" @endif
         @if ($person->mother_id && !$person->father_id) data-parent-id="node-{{ $person->mother_id }}" @endif
-        class="flex items-stretch rounded-xl {{ $shadowClass }} {{ $borderWidth }} {{ $borderColor }} {{ $ringClass }} {{ $decorativeClass }} transition-all duration-300 ease-out group-hover:border-primary-400 relative
+        class="flex flex-col items-center rounded-xl {{ $shadowClass }} {{ $borderWidth }} {{ $borderColor }} {{ $ringClass }} {{ $decorativeClass }} transition-all duration-300 ease-out group-hover:border-primary-400 relative
         @if (isset($filters['focusedPersonId']) && $filters['focusedPersonId'] == $person->id) !border-purple-500 !border-[3px] !ring-2 !ring-purple-300 @endif">
 
         @if ($generationLevel == 1)
@@ -409,25 +409,26 @@
 
                 @if ($layoutHorizontal)
                     {{-- Spouse for Gen 1-2: Horizontal compact --}}
-                    <div class="w-28 flex items-center gap-1.5 p-2 border-l border-gray-300 relative {{ $spouseGenderBg }} {{ $spouseStatusBorder }} border-t-[3px] {{ !$spouse->is_alive ? 'grayscale-[20%] opacity-95' : '' }} hover:bg-opacity-80 transition-all"
+                    <div class="min-w-[20rem] flex items-center justify-center gap-3 p-3 mt-2 -mt-1 relative border-t-2 border-[#8B0000]/30 transition-all group/spouse hover:scale-105 hover:z-10 rounded-b-xl"
+                        style="background-image: url('{{ asset('images/nendoi.png') }}'); background-size: 100% 100%; {{ $spouse->gender === 'male' ? 'background-color: #FFCC00; color: #800000;' : 'background-color: #FFB6C1; color: #800000;' }}"
                         tabindex="0"
                         @keydown.enter.prevent="$dispatch('person-selected', { id: {{ $spouse->id }} })"
                         @keydown.space.prevent="$dispatch('person-selected', { id: {{ $spouse->id }} })"
                         wire:click.stop="$dispatch('person-selected', { id: {{ $spouse->id }} })">
 
                         @if (!$spouse->is_alive)
-                            <div class="absolute top-1 right-1 w-1.5 h-1.5 bg-gray-400 rounded-full" title="Đã mất">
+                            <div class="absolute top-1 right-1 w-1.5 h-1.5 bg-gray-600 rounded-full" title="Đã mất">
                             </div>
                         @endif
 
                         <div
-                            class="w-8 h-8 flex-shrink-0 rounded-full border border-white shadow-sm overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                            class="w-12 h-12 flex-shrink-0 rounded-full border-2 border-white shadow-md overflow-hidden bg-white/50">
                             @if ($spouse->avatar_url)
                                 <img src="{{ $spouse->avatar_url }}" alt="{{ $spouse->name }}"
                                     class="w-full h-full object-cover">
                             @else
-                                <div class="w-full h-full flex items-center justify-center text-gray-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
+                                <div class="w-full h-full flex items-center justify-center text-gray-500/50">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20"
                                         fill="currentColor">
                                         <path fill-rule="evenodd"
                                             d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
@@ -437,11 +438,12 @@
                             @endif
                         </div>
 
-                        <div class="flex-1 min-w-0">
-                            <h3 class="font-bold {{ $spouseNameColor }} text-xs truncate leading-tight">
+                        <div class="flex flex-col justify-center text-left">
+                            <h3 class="font-serif font-bold text-[#800000] text-sm uppercase tracking-wide truncate leading-tight drop-shadow-sm">
                                 {{ $spouse->name }}</h3>
-                            <p class="text-[10px] text-gray-600 font-medium leading-tight">
-                                {{ $spouse->birth_year ?? '?' }}</p>
+                            <p class="text-[10px] text-[#A52A2A] font-bold leading-tight mt-0.5">
+                                {{ $spouse->birth_year ?? '?' }} - {{ $spouse->death_year ?? ($spouse->is_alive ? 'nay' : '?') }}
+                            </p>
                         </div>
                     </div>
                 @else

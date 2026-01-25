@@ -11,6 +11,12 @@ class FamilyTree extends Component
     public $focusedPersonId = null;
     public $originalRootId = null;
     public $breadcrumbPath = [];
+    public $treeVersion = 0;
+    
+    // Tab & Search Logic for Mobile Menu
+    public $activeTab = 'tree'; 
+    public $listSearch = '';
+    public $mobileMenuOpen = false; // Control loop via mobile menu
 
     public $filters = [
         'showAlive' => true,
@@ -22,6 +28,21 @@ class FamilyTree extends Component
         'showSpouses' => true,
         'treeTitle' => 'Gia đình ông Làng, bà Oanh - Kính dâng tặng',
     ];
+
+    public function setTab($tab)
+    {
+        $this->activeTab = $tab;
+    }
+
+    public function openMenu()
+    {
+        $this->mobileMenuOpen = true;
+    }
+
+    public function closeMenu()
+    {
+        $this->mobileMenuOpen = false;
+    }
 
     protected $listeners = [
         // 'refreshTree' => '$refresh', // Disabled to prevent flickering
@@ -35,11 +56,22 @@ class FamilyTree extends Component
         // Refresh root to ensure fresh data (especially if children relation was cached)
         if ($this->rootPerson) {
              $this->rootPerson->refresh();
+        } else {
+            // If no root existed, find the one that was just created
+            $originalRoot = Person::whereNull('father_id')
+                ->whereNull('mother_id')
+                ->first();
+
+            if ($originalRoot) {
+                $this->originalRootId = $originalRoot->id;
+                $this->rootPerson = $originalRoot;
+            }
         }
         
+        $this->treeVersion++;
+        
         // Dispatch browser event to center on the new/updated node
-        // We add a small delay to ensure DOM is updated first (handled by Livewire usually, but Alpine might need a tick)
-        $this->dispatch('center-on-node', ['nodeId' => 'node-' . $personId]);
+        $this->dispatch('center-on-node', nodeId: 'node-' . $personId);
     }
 
     public function updateFilters($filters)
@@ -49,11 +81,7 @@ class FamilyTree extends Component
     
     public function mount()
     {
-        // Mobile Redirect Logic
-        $userAgent = strtolower(request()->header('User-Agent'));
-        if (preg_match('/(android|webos|iphone|ipad|ipod|blackberry|windows phone)/i', $userAgent)) {
-            return redirect()->route('mobile.tree');
-        }
+        // Mobile Redirect Logic Removed (Unified View)
 
         // Get the original root person
         $originalRoot = Person::whereNull('father_id')
@@ -125,7 +153,32 @@ class FamilyTree extends Component
 
     public function render()
     {
-        return view('livewire.family-tree')
-            ->layout('components.layouts.app-canvas');
+        $stats = [];
+        $members = [];
+
+        if ($this->activeTab === 'stats') {
+             $stats = [
+                'total_members' => \App\Models\Person::count(),
+                'living_members' => \App\Models\Person::where('is_alive', true)->count(),
+                'deceased_members' => \App\Models\Person::where('is_alive', false)->count(),
+                'total_generations' => \App\Models\Person::whereNotNull('generation_id')->distinct('generation_id')->count('generation_id'),
+                'male_members' => \App\Models\Person::where('gender', 'male')->count(),
+                'female_members' => \App\Models\Person::where('gender', 'female')->count(),
+            ];
+        }
+
+        if ($this->activeTab === 'list') {
+            $query = \App\Models\Person::query();
+            if ($this->listSearch) {
+                $query->where('name', 'like', '%' . $this->listSearch . '%')
+                      ->orWhere('nickname', 'like', '%' . $this->listSearch . '%');
+            }
+            $members = $query->orderBy('name')->simplePaginate(15);
+        }
+
+        return view('livewire.family-tree', [
+            'stats' => $stats,
+            'members' => $members
+        ])->layout('components.layouts.app-canvas');
     }
 }

@@ -22,6 +22,15 @@ class MobileFamilyTree extends Component
     public $addParentId = null;
     public $editingPersonId = null;
 
+    // Tab & Search Logic for Mobile Menu
+    public $activeTab = 'tree'; 
+    public $listSearch = '';
+    
+    public function setTab($tab)
+    {
+        $this->activeTab = $tab;
+    }
+
     public function mount()
     {
         $this->loadRootPerson();
@@ -99,8 +108,11 @@ class MobileFamilyTree extends Component
         'showDeceased' => true,
         'showMale' => true,
         'showFemale' => true,
+        'showMale' => true,
+        'showFemale' => true,
         'showDates' => true,
         'showSpouses' => true,
+        'treeTitle' => 'Gia đình ông Làng, bà Oanh - Kính dâng tặng',
     ];
 
     // Modal Management
@@ -120,38 +132,22 @@ class MobileFamilyTree extends Component
         $this->loading = false;
     }
 
-    public function closeModal()
-    {
-        $this->modalMode = 'none';
-        $this->selectedPerson = null;
-        $this->addParentId = null;
-        $this->editingPersonId = null;
-    }
-
     // Person Selection (View Mode)
     public function selectPerson($personId)
     {
-        $this->modalMode = 'view';
-        $this->selectedPerson = Person::with([
-            'father',
-            'mother',
-            // Children loaded lazily
-            'burialInfo',
-            'achievements',
-            'marriagesAsHusband.wife',
-            'marriagesAsWife.husband'
-        ])->find($personId);
+        $this->dispatch('person-selected', id: $personId);
     }
     
     // Add Person Setup
     public function openAddModal($parentId = null)
     {
-        $this->modalMode = 'add';
-        $this->addParentId = $parentId;
-        $this->editingPersonId = null;
-        $this->reset(['newPersonName', 'newPersonGender', 'newPersonBirthYear', 'newPersonIsAlive', 'newPersonNickname', 'newPersonTitle', 'newPersonOccupation', 'newPersonHometown', 'newPersonPlaceOfBirth', 'newPersonAddress', 'newPersonPhone', 'newPersonEmail', 'newPersonDeathYear', 'newPersonDeathDateFull', 'newPersonBurialPlace', 'newPersonBurialDate', 'newPersonAvatar', 'newPersonGravePhoto', 'existingAvatarUrl', 'existingGravePhotoUrl']);
-        $this->newPersonGender = 'male'; 
-        $this->newPersonIsAlive = true;
+        $this->dispatch('open-add-modal', parentId: $parentId);
+    }
+
+    public function closeModal()
+    {
+        // No-op or dispatch close event if needed
+        $this->dispatch('close-sidebar');
     }
 
     // Edit Person Setup
@@ -319,7 +315,32 @@ class MobileFamilyTree extends Component
 
     public function render()
     {
-        return view('livewire.mobile-family-tree')
-            ->layout('components.layouts.mobile-layout');
+        $stats = [];
+        $members = [];
+
+        if ($this->activeTab === 'stats') {
+             $stats = [
+                'total_members' => \App\Models\Person::count(),
+                'living_members' => \App\Models\Person::where('is_alive', true)->count(),
+                'deceased_members' => \App\Models\Person::where('is_alive', false)->count(),
+                'total_generations' => \App\Models\Person::whereNotNull('generation_id')->distinct('generation_id')->count('generation_id'),
+                'male_members' => \App\Models\Person::where('gender', 'male')->count(),
+                'female_members' => \App\Models\Person::where('gender', 'female')->count(),
+            ];
+        }
+
+        if ($this->activeTab === 'list') {
+            $query = \App\Models\Person::query();
+            if ($this->listSearch) {
+                $query->where('name', 'like', '%' . $this->listSearch . '%')
+                      ->orWhere('nickname', 'like', '%' . $this->listSearch . '%');
+            }
+            $members = $query->orderBy('name')->simplePaginate(15);
+        }
+
+        return view('livewire.mobile-family-tree', [
+            'stats' => $stats,
+            'members' => $members
+        ])->layout('components.layouts.mobile-layout');
     }
 }

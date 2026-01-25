@@ -207,16 +207,23 @@
                         $spouseNameColor = $spouse->gender === 'male' ? 'text-blue-900' : 'text-pink-900';
                     @endphp
 
-                    <div class="mt-2 w-24 {{ $spouseBg }} border border-gray-300 {{ $spouseBorder }} border-t-[3px] rounded-md p-1.5 text-center shadow-sm {{ !$spouse->is_alive ? 'grayscale-[20%] opacity-95' : '' }} cursor-pointer hover:bg-opacity-80 transition-all"
+                    <div class="mt-2 w-40 flex flex-col justify-center items-center gap-1 p-2 relative border-t-2 border-[#8B0000]/30 transition-all hover:scale-105 active:scale-95 rounded-b-xl"
+                        style="background-image: url('{{ asset('images/nendoi.png') }}'); background-size: 100% 100%; {{ $spouse->gender === 'male' ? 'background-color: #FFCC00; color: #800000;' : 'background-color: #FFB6C1; color: #800000;' }}"
                         wire:click.stop="selectPerson({{ $spouse->id }})">
+
+                        @if (!$spouse->is_alive)
+                            <div class="absolute top-1 right-1 w-1.5 h-1.5 bg-gray-600 rounded-full" title="Đã mất">
+                            </div>
+                        @endif
+
                         <div
-                            class="w-8 h-8 mx-auto mb-1 rounded-full border border-gray-200 shadow-sm overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                            class="w-10 h-10 mx-auto rounded-full border-2 border-white shadow-md overflow-hidden bg-white/50">
                             @if ($spouse->avatar_url)
                                 <img src="{{ $spouse->avatar_url }}" alt="{{ $spouse->name }}"
                                     class="w-full h-full object-cover">
                             @else
-                                <div class="w-full h-full flex items-center justify-center text-gray-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
+                                <div class="w-full h-full flex items-center justify-center text-gray-500/50">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                         fill="currentColor">
                                         <path fill-rule="evenodd"
                                             d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
@@ -225,8 +232,12 @@
                                 </div>
                             @endif
                         </div>
-                        <p class="font-bold {{ $spouseNameColor }} text-[10px] truncate">{{ $spouse->name }}</p>
-                        <p class="text-[9px] text-gray-600">{{ $spouse->birth_year ?? '?' }}</p>
+                        <div class="text-center">
+                            <p class="font-serif font-bold text-[#800000] text-xs truncate uppercase tracking-wide leading-tight drop-shadow-sm">{{ $spouse->name }}</p>
+                            <p class="text-[9px] text-[#A52A2A] font-bold mt-0.5">
+                                {{ $spouse->birth_year ?? '?' }} - {{ $spouse->death_year ?? ($spouse->is_alive ? 'nay' : '?') }}
+                            </p>
+                        </div>
                     </div>
                 @endforeach
             @endif

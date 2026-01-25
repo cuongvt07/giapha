@@ -196,6 +196,75 @@
                 {{ $person->birth_year ?? '?' }}
             </div>
         @endif
+
+        {{-- Mobile Spouse Display --}}
+        @if ($filters['showSpouses'] ?? true)
+            @foreach ($person->spouses as $spouse)
+                @php
+                    $spouseGenderBg =
+                        $spouse->gender === 'male'
+                            ? 'bg-gradient-to-br from-blue-50 to-blue-100'
+                            : 'bg-gradient-to-br from-pink-50 to-pink-100';
+                    $spouseStatusBorder = $spouse->is_alive ? 'border-t-green-500' : 'border-t-gray-400';
+                    $spouseNameColor = $spouse->gender === 'male' ? 'text-blue-900' : 'text-pink-900';
+                @endphp
+
+                @if (!$useVerticalText)
+                    {{-- Horizontal Mobile Spouse (Gen 1-6 sparse) --}}
+                    <div class="w-[95%] flex items-center justify-center gap-2 p-2 mt-2 -mb-1 relative border-t border-black/10 rounded-lg shadow-sm"
+                        style="{{ $spouse->gender === 'male' ? 'background-color: rgba(255, 204, 0, 0.85);' : 'background-color: rgba(255, 182, 193, 0.85);' }}"
+                        wire:click.stop="$dispatch('person-selected', { id: {{ $spouse->id }} })">
+                        
+                        {{-- Spouse Avatar --}}
+                        <div class="w-9 h-9 flex-shrink-0 rounded-full border-2 border-white shadow-sm overflow-hidden bg-white/50">
+                             @if ($spouse->avatar_url)
+                                <img src="{{ $spouse->avatar_url }}" alt="{{ $spouse->name }}" class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center text-gray-500/50">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Spouse Info --}}
+                        <div class="flex flex-col text-left min-w-0">
+                            <span class="text-xs font-black uppercase truncate {{ $spouseNameColor }} leading-tight drop-shadow-sm">
+                                {{ $spouse->name }}
+                            </span>
+                            <span class="text-[10px] text-gray-800 font-bold leading-none">
+                                {{ $spouse->birth_year ?? '?' }}
+                            </span>
+                        </div>
+                    </div>
+                @else
+                    {{-- Vertical Mobile Spouse (Gen 7+ or crowded) --}}
+                    <div class="flex flex-col items-center px-0.5 py-1.5 mt-1 border border-gray-300 rounded {{ $spouseGenderBg }} {{ $spouseStatusBorder }} border-t-[3px] shadow-sm"
+                        style="width: 100%; opacity: 1;"
+                        wire:click.stop="$dispatch('person-selected', { id: {{ $spouse->id }} })">
+                        
+                         {{-- Spouse Avatar --}}
+                        <div class="w-7 h-7 rounded-full border border-white shadow-sm overflow-hidden bg-white/50 mb-0.5">
+                             @if ($spouse->avatar_url)
+                                <img src="{{ $spouse->avatar_url }}" alt="{{ $spouse->name }}" class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center text-gray-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="text-[10px] font-bold {{ $spouseNameColor }} leading-none whitespace-nowrap"
+                            style="writing-mode: vertical-rl; text-orientation: mixed; text-shadow: 0 1px 1px rgba(255,255,255,0.5);">
+                            {{ $spouse->name }}
+                        </div>
+                    </div>
+                @endif
+            @endforeach
+        @endif
     </div>
 
     {{-- Children --}}

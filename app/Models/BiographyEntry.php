@@ -5,22 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Achievement extends Model
+class BiographyEntry extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'person_id',
-        'title',
+        'content',
         'time_period',
-        'achievement_type',
-        'achievement_date',
-        'description',
         'display_order',
-    ];
-
-    protected $casts = [
-        'achievement_date' => 'date',
     ];
 
     public function person()

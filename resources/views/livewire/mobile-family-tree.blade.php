@@ -12,7 +12,11 @@
         </button>
 
         {{-- Title --}}
-        <h1 class="text-lg font-bold text-gray-900">Cây Gia Phả</h1>
+        <div class="flex-1 overflow-hidden mx-2">
+            <marquee scrollamount="4" class="font-bold text-gray-900 text-lg whitespace-nowrap">
+                {{ $filters['treeTitle'] ?? 'Gia Phả Đại Tộc' }}
+            </marquee>
+        </div>
 
         {{-- Home Button --}}
         <button wire:click="resetToRoot" class="p-2 -mr-2 rounded-lg hover:bg-gray-100 active:bg-gray-200">
@@ -172,7 +176,7 @@
                             const dist = this.getDist(e.touches);
                             if (dist > 0 && this.lastDist > 0) {
                                 const ratio = dist / this.lastDist;
-                                const newScale = Math.min(Math.max(this.scale * ratio, 0.3),
+                                const newScale = Math.min(Math.max(this.scale * ratio, 0.1),
                                     3.0);
                                 this.scale = newScale;
                                 this.lastDist = dist;
@@ -202,7 +206,7 @@
                     if (this.jsPlumbInstance) this.jsPlumbInstance.setZoom(this.scale);
                 },
                 zoomOut() {
-                    this.scale = Math.max(this.scale / 1.2, 0.3);
+                    this.scale = Math.max(this.scale / 1.2, 0.1);
                     if (this.jsPlumbInstance) this.jsPlumbInstance.setZoom(this.scale);
                 },
                 resetView() {
@@ -334,22 +338,8 @@
         @include('livewire.partials.mobile-menu')
     </div>
 
-    {{-- Unified Modal --}}
-    @if ($modalMode !== 'none')
-        <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
-            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4"
-            x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-4">
-            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" wire:click="closeModal"></div>
-            <div
-                class="relative bg-white w-full h-[85vh] sm:h-auto sm:max-h-[90vh] rounded-t-3xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col transform transition-transform">
-                @include('livewire.partials.mobile-person-modal', [
-                    'mode' => $modalMode,
-                    'selectedPerson' => $selectedPerson,
-                ])
-            </div>
-        </div>
-    @endif
+    {{-- Unified Sidebar (Replaces Modal) --}}
+    <livewire:components.sidebar-right />
 
     {{-- Loading Overlay - Only shows for slow operations --}}
     <div wire:loading.flex wire:target="focusOnPerson, resetToRoot"

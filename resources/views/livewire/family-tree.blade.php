@@ -1,3 +1,5 @@
+<div class="w-full h-full">
+
 <div class="relative w-full h-full">
     {{-- MOBILE: Horizontal Tree with Touch Pan/Zoom --}}
     <div class="lg:hidden w-full h-full" x-data="{
@@ -493,10 +495,7 @@
             @mousedown="setPanning($event)" @mouseup="releasePanning($event)" @mouseleave="releasePanning($event)"
             @mousemove="pan($event)" @wheel="zoom($event)">
 
-            <!-- DEBUG INFO BOX -->
-            <div class="absolute top-20 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs p-2 rounded z-[100] pointer-events-none font-mono"
-                x-text="'Debug: Nodes: ' + debugNodeCount + ' | Conns: ' + debugConnCount + ' | Status: ' + debugStatus">
-            </div>
+
 
             <!-- Background Image (Traditional/Dragon Scroll) -->
             <div class="absolute inset-0 pointer-events-none"
@@ -519,10 +518,11 @@
                     <!-- Optional decorative icon -->
                     <span class="text-lg opacity-80">📜</span>
 
-                    <h1
-                        class="font-serif text-base md:text-lg text-[#C41E3A] font-bold uppercase tracking-widest whitespace-nowrap">
-                        {{ $filters['treeTitle'] ?? 'Gia phả dòng họ Nguyễn' }}
-                    </h1>
+                    <div class="overflow-hidden w-64 md:w-96">
+                        <marquee scrollamount="4" class="font-serif text-base md:text-lg text-[#C41E3A] font-bold uppercase tracking-widest whitespace-nowrap">
+                            {{ $filters['treeTitle'] ?? 'Gia phả dòng họ Nguyễn' }}
+                        </marquee>
+                    </div>
 
                     <span class="text-lg transform scale-x-[-1] opacity-80">📜</span>
                 </div>
@@ -625,51 +625,29 @@
                         @endif
                     </div>
                 @else
-                    <!-- Infinite Canvas Container -->
-                    <div class="relative w-full h-full overflow-hidden bg-gradient-to-br from-gray-50 via-blue-50/30 to-pink-50/30"
-                        x-on:mousedown="startDrag($event)" x-on:mousemove="drag($event)" x-on:mouseup="stopDrag"
-                        x-on:mouseleave="stopDrag" x-on:wheel.prevent="zoom($event)"
-                        style="background-image: 
-            radial-gradient(circle, rgba(200, 200, 200, 0.15) 1px, transparent 1px),
-            radial-gradient(circle, rgba(200, 200, 200, 0.15) 1px, transparent 1px);
-            background-size: 40px 40px;
-            background-position: 0 0, 20px 20px;">
+                    <div class="relative w-full h-full overflow-hidden flex items-center justify-center p-4">
+                        <div class="absolute inset-0 z-0 bg-cover bg-center opacity-30 pointer-events-none"
+                             style="background-image: url('/images/bg-dragon-scroll.jpg');"></div>
 
-                        <!-- Zoom Controls -->
-                        <div class="absolute top-4 right-4 flex flex-col gap-2 z-50 pointer-events-auto">
-                            <button @click="zoomIn"
-                                class="bg-white hover:bg-primary-50 text-gray-700 hover:text-primary-600 p-3 rounded-xl shadow-lg hover:shadow-xl transition-all border border-gray-200 hover:border-primary-300 group">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4v16m8-8H4" />
+                        <div class="bg-white/80 backdrop-blur-xl p-10 rounded-3xl shadow-2xl text-center max-w-md border border-white/50 animate-fade-in-up z-10 relative">
+                            <div class="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                                <span class="text-6xl">🌱</span>
+                            </div>
+                            
+                            <h2 class="text-3xl font-bold text-gray-800 mb-2 font-serif">Khởi tạo Gia Phả</h2>
+                            <p class="text-gray-500 mb-8 text-lg font-light">
+                                "Cây có cội, nước có nguồn."<br>Hãy bắt đầu hành trình ghi chép lịch sử dòng họ.
+                            </p>
+                            
+                            <button wire:click="$dispatch('open-add-modal')" class="w-full py-4 px-8 bg-gradient-to-r from-[#C41E3A] to-[#A01830] text-white rounded-xl font-bold text-lg shadow-lg shadow-red-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 group">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 group-hover:rotate-90 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                 </svg>
+                                <span>Thêm người đầu tiên</span>
                             </button>
-                            <button @click="zoomOut"
-                                class="bg-white hover:bg-primary-50 text-gray-700 hover:text-primary-600 p-3 rounded-xl shadow-lg hover:shadow-xl transition-all border border-gray-200 hover:border-primary-300 group">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M20 12H4" />
-                                </svg>
-                            </button>
-                            <button @click="resetView"
-                                class="bg-white hover:bg-primary-50 text-gray-700 hover:text-primary-600 p-3 rounded-xl shadow-lg hover:shadow-xl transition-all border border-gray-200 hover:border-primary-300 group"
-                                title="Reset View">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="h-5 w-5 group-hover:rotate-180 transition-transform duration-500"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                </svg>
-                            </button>
-                        </div> Tạo người đầu tiên
-                        </button>
+                        </div>
                     </div>
-            </div>
-            @endif
+                @endif
         </div>
     </div>
 
@@ -710,4 +688,5 @@
 
     {{-- Mobile Bottom Navigation --}}
     @include('components.bottom-nav')
+</div>
 </div>

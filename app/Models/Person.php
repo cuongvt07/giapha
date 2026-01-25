@@ -28,6 +28,7 @@ class Person extends Model
         'address',
         'phone',
         'email',
+        'facebook_url',
         'avatar_path',
         'lineage_position',
         'birth_order',
@@ -78,6 +79,11 @@ class Person extends Model
     public function achievements()
     {
         return $this->hasMany(Achievement::class)->orderBy('display_order', 'asc');
+    }
+
+    public function biographyEntries()
+    {
+        return $this->hasMany(BiographyEntry::class)->orderBy('display_order', 'asc');
     }
 
     public function customRelationships()

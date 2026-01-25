@@ -15,6 +15,7 @@ class BurialInfo extends Model
         'person_id',
         'burial_place',
         'burial_date',
+        'death_date_full',
         'gps_coordinates',
         'grave_type',
         'grave_description',
