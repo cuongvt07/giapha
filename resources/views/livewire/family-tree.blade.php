@@ -549,9 +549,15 @@
                 // Refresh the visual frame dimensions to fit the screen
                 updateSheetPreview() {
                     this.$nextTick(() => {
+                        const canvasArea = document.getElementById('print-canvas-area');
+                        if (!canvasArea || canvasArea.offsetWidth === 0) return;
+
+                        const availW = canvasArea.offsetWidth - 100;
+                        const availH = canvasArea.offsetHeight - 100;
+
                         if (this.selectedPaperSize === 'auto') {
-                            this.sheetW = 2000; 
-                            this.sheetH = 2000;
+                            this.sheetW = availW; 
+                            this.sheetH = availH;
                             this.sheetScale = 1;
                         } else {
                             const size = this.PAPER_SIZES[this.selectedPaperSize];
@@ -565,7 +571,8 @@
                             }
                             this.sheetW = baseW;
                             this.sheetH = baseH;
-                            this.sheetScale = 1; // No viewport scaling needed anymore
+                            // Calculate scale to fit in viewport
+                            this.sheetScale = Math.min(availW / baseW, availH / baseH);
                         }
                     });
                 },
@@ -969,6 +976,9 @@
                     // 4c. Ensure title is centered at top
                     const titleClone = clone.querySelector('.print-title-container');
                     if (titleClone) {
+                        titleClone.classList.remove('opacity-0', 'invisible');
+                        titleClone.style.opacity = '1';
+                        titleClone.style.visibility = 'visible';
                         titleClone.style.position = 'absolute';
                         titleClone.style.top = '20px';
                         titleClone.style.left = '0';
@@ -1360,114 +1370,176 @@
                 @endif
         </div>
 
-        {{-- ====== EXPORT MODAL OVERLAY ====== --}}
+        {{-- ====== PRINT PREVIEW OVERLAY ====== --}}
         <div x-show="printPreviewActive" x-cloak
-             class="fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4"
+             class="fixed inset-0 z-[100] bg-[#f5f0e8] flex flex-col"
              @keydown.escape.window="closePrintPreview()"
+             @mousemove.window="printOnDrag($event); printDoPan($event)"
+             @mouseup.window="printEndDrag($event); printEndPan($event)"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
 
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col" @click.stop>
-                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                    <h2 class="text-xl font-bold text-gray-800 font-serif text-[#C41E3A]">Xuất Gia Phả</h2>
-                    <button @click="closePrintPreview()" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            {{-- TOP TOOLBAR --}}
+            <div class="flex-shrink-0 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-lg px-4 py-2 flex items-center justify-between gap-2 z-10">
+                {{-- Left: Tab Selection --}}
+                <div class="flex items-center bg-gray-100 p-1 rounded-xl">
+                    <button @click="printTab = 'tree'" 
+                            class="px-4 py-1.5 rounded-lg text-sm font-bold transition-all"
+                            :class="printTab === 'tree' ? 'bg-white shadow-sm text-[#C41E3A]' : 'text-gray-500 hover:text-gray-700'">
+                        Cây Gia Phả
+                    </button>
+                    <button @click="printTab = 'calendar'" 
+                            class="px-4 py-1.5 rounded-lg text-sm font-bold transition-all"
+                            :class="printTab === 'calendar' ? 'bg-white shadow-sm text-[#C41E3A]' : 'text-gray-500 hover:text-gray-700'">
+                        Lịch Sự Kiện
                     </button>
                 </div>
-                
-                <div class="p-6 flex flex-col gap-6">
-                    {{-- Tab Selection --}}
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Nội dung in</label>
-                        <div class="flex items-center bg-gray-100 p-1.5 rounded-xl">
-                            <button @click="printTab = 'tree'" class="flex-1 py-2.5 rounded-lg text-sm font-bold transition-all" :class="printTab === 'tree' ? 'bg-white shadow-sm text-[#C41E3A]' : 'text-gray-500 hover:text-gray-700'">Cây Gia Phả</button>
-                            <button @click="printTab = 'calendar'" class="flex-1 py-2.5 rounded-lg text-sm font-bold transition-all" :class="printTab === 'calendar' ? 'bg-white shadow-sm text-[#C41E3A]' : 'text-gray-500 hover:text-gray-700'">Lịch Sự Kiện</button>
-                        </div>
+
+                {{-- Center: Actions --}}
+                <div class="flex items-center gap-2">
+                    {{-- Toggle Drag --}}
+                    <button @click="printDragEnabled = !printDragEnabled"
+                            class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+                            :class="printDragEnabled ? 'bg-blue-100 text-blue-700 ring-1 ring-blue-300' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                        </svg>
+                        <span x-text="printDragEnabled ? 'Kéo: BẬT' : 'Kéo: TẮT'"></span>
+                    </button>
+
+                    {{-- Reset Positions --}}
+                    <button @click="printResetOffsets()"
+                            class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span>Reset</span>
+                    </button>
+
+                    <div class="w-px h-8 bg-gray-300 mx-1"></div>
+
+                    {{-- Paper Size Selection --}}
+                    <div class="flex items-center gap-2">
+                        <select x-model="selectedPaperSize" class="bg-gray-100 border-none text-xs font-bold rounded-lg px-2 py-2 focus:ring-0 cursor-pointer">
+                            <template x-for="(info, key) in PAPER_SIZES" :key="key">
+                                <option :value="key" x-text="info.name"></option>
+                            </template>
+                        </select>
+                        
+                        <button @click="paperOrientation = (paperOrientation === 'landscape' ? 'portrait' : 'landscape')"
+                                class="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"
+                                :class="selectedPaperSize === 'auto' ? 'opacity-30 pointer-events-none' : ''"
+                                :title="paperOrientation === 'landscape' ? 'Xoay dọc' : 'Xoay ngang'">
+                            <svg x-show="paperOrientation === 'landscape'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                            <svg x-show="paperOrientation === 'portrait'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 4v16M12 4v16M18 4v16" />
+                            </svg>
+                        </button>
                     </div>
 
-                    {{-- Paper Size & Orientation --}}
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Khổ giấy</label>
-                            <select x-model="selectedPaperSize" class="w-full bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#C41E3A]/20 focus:border-[#C41E3A] outline-none transition-all cursor-pointer font-medium">
-                                <template x-for="(info, key) in PAPER_SIZES" :key="key">
-                                    <option :value="key" x-text="info.name"></option>
-                                </template>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Độ sắc nét</label>
-                            <select x-model="exportQuality" class="w-full bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#C41E3A]/20 focus:border-[#C41E3A] outline-none transition-all cursor-pointer font-medium">
-                                <option value="1">Thường (Nhanh)</option>
-                                <option value="2">Nét (HD)</option>
-                                <option value="3">Siêu Nét (4K)</option>
-                            </select>
-                        </div>
+                    <div class="w-px h-8 bg-gray-300 mx-1"></div>
+
+                    {{-- Quality Selector --}}
+                    <div class="flex items-center gap-1">
+                        <span class="text-[10px] font-bold text-gray-400">Độ nét:</span>
+                        <select x-model="exportQuality" class="bg-gray-100 border-none text-xs font-bold rounded-lg px-2 py-2 focus:ring-0 cursor-pointer">
+                            <option value="1">Thường</option>
+                            <option value="2">Nét (HD)</option>
+                            <option value="3">Siêu Nét (4K)</option>
+                        </select>
                     </div>
 
-                    {{-- Orientation --}}
-                    <div x-show="selectedPaperSize !== 'auto'">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Chiều giấy</label>
-                        <div class="flex items-center bg-gray-100 p-1.5 rounded-xl">
-                            <button @click="paperOrientation = 'landscape'" class="flex flex-1 items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all" :class="paperOrientation === 'landscape' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'" :disabled="selectedPaperSize === 'auto'">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-                                Xoay Ngang
-                            </button>
-                            <button @click="paperOrientation = 'portrait'" class="flex flex-1 items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all" :class="paperOrientation === 'portrait' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'" :disabled="selectedPaperSize === 'auto'">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 4v16M12 4v16M18 4v16" /></svg>
-                                Xoay Dọc
-                            </button>
-                        </div>
-                    </div>
+                    <div class="w-px h-8 bg-gray-300 mx-1"></div>
+
+                    {{-- Zoom controls --}}
+                    <button @click="printScale = Math.max(printScale / 1.1, 0.1)" class="p-2 hover:bg-gray-100 rounded-lg text-gray-600" title="Thu nhỏ">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <span class="text-xs font-bold text-gray-600 min-w-[3rem] text-center" x-text="Math.round(printScale * 100) + '%'"></span>
+                    <button @click="printScale = Math.min(printScale * 1.1, 3)" class="p-2 hover:bg-gray-100 rounded-lg text-gray-600" title="Phóng to">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <div class="w-px h-8 bg-gray-300 mx-1"></div>
+
+                    {{-- Export Buttons --}}
+                    <button @click="exportPNG()"
+                            :disabled="printExporting"
+                            style="background: linear-gradient(to right, #22c55e, #16a34a);"
+                            class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold text-white shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-wait">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>Xuất PNG</span>
+                    </button>
+
+                    <button @click="exportPDF()"
+                            :disabled="printExporting"
+                            class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold bg-gradient-to-r from-[#C41E3A] to-[#A01830] text-white hover:from-[#A01830] hover:to-[#800020] shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-wait">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        <span>Xuất PDF</span>
+                    </button>
                 </div>
 
-                <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-3">
-                    <button @click="closePrintPreview()" class="px-6 py-2.5 text-sm font-bold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-800 rounded-xl transition-all shadow-sm">Hủy</button>
-                    <button @click="exportPNG()" :disabled="printExporting" class="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-xl shadow-md disabled:opacity-50 transition-all">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                        Xuất PNG
-                    </button>
-                    <button @click="exportPDF()" :disabled="printExporting" class="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-[#C41E3A] to-[#A01830] hover:from-[#A01830] hover:to-[#800020] rounded-xl shadow-md disabled:opacity-50 transition-all">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                        Xuất PDF
-                    </button>
-                </div>
+                {{-- Right: Close --}}
+                <button @click="closePrintPreview()"
+                        class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span>Đóng</span>
+                </button>
             </div>
 
-            {{-- Hidden Canvas Area for Export Snapshot --}}
-            <div id="print-canvas-area" class="fixed top-[-9999px] left-[-9999px] opacity-0 pointer-events-none w-[2000px] h-[2000px] overflow-visible"
+            {{-- PREVIEW CANVAS AREA --}}
+            <div id="print-canvas-area" class="flex-1 overflow-hidden relative cursor-grab active:cursor-grabbing bg-[#333] flex items-center justify-center"
                  x-init="setTimeout(() => updateSheetPreview(), 500)"
-                 x-effect="selectedPaperSize; paperOrientation; updateSheetPreview()">
+                 x-effect="selectedPaperSize; paperOrientation; updateSheetPreview()"
+                 @mousedown="printStartPan($event)"
+                 @wheel.prevent="printZoom($event)">
 
                 {{-- The Visual Paper Frame --}}
                 <div id="print-paper-sheet" 
                      class="shadow-2xl relative bg-white transition-all duration-300 overflow-hidden shrink-0"
                      :style="selectedPaperSize === 'auto' 
                         ? `width: 100%; height: 100%; transform: none;` 
-                        : `width: ${sheetW}px; height: ${sheetH}px; transform: scale(${sheetScale}); transform-origin: top left;`
+                        : `width: ${sheetW}px; height: ${sheetH}px; transform: scale(${sheetScale}); transform-origin: center;`
                      ">
 
-                    {{-- Background --}}
+                    {{-- Background: same dragon scroll as original --}}
                     <div class="absolute inset-0 pointer-events-none"
                          style="background-image: url(/images/bg-dragon-scroll.jpg); background-size: cover; background-position: center; opacity: 0.5;"></div>
 
-                    {{-- Title Header --}}
-                    <div class="print-title-container absolute left-0 right-0 z-40 px-10 pointer-events-none select-none flex justify-center w-full"
+                    {{-- Title Header: Hidden in print preview, shown during export capture --}}
+                    <div class="print-title-container absolute left-0 right-0 z-40 px-10 pointer-events-none select-none flex justify-center opacity-0 invisible"
                          :style="`top: ${getTitleTopMargin()}px`">
                         <div class="print-title-frame flex items-center justify-center transition-all duration-300 w-full overflow-visible">
                             <span class="font-serif font-bold uppercase tracking-[0.2em] block text-center text-[#C41E3A] whitespace-nowrap overflow-visible max-w-none"
                                   :class="getTitleFontSize()">
-                                {{ $filters['treeTitle'] ?? 'Gia phả dòng họ Nguyễn' }}
-                            </span>
+                                    {{ $filters['treeTitle'] ?? 'Gia phả dòng họ Nguyễn' }}
+                                </span>
                         </div>
                     </div>
 
                     {{-- Tree Content (Cloned) --}}
                     <div id="print-preview-tree" x-show="printTab === 'tree'"
                          class="absolute origin-top-left will-change-transform"
-                         :style="`transform: translate(0px, 0px) scale(${printScale});`">
+                         :style="`transform: translate(${printPanX}px, ${printPanY}px) scale(${printScale});`"
+                         @mousedown="if (printDragEnabled) {
+                            const nodeEl = $event.target.closest('[id^=node-]');
+                            if (nodeEl) { printStartDrag($event, nodeEl); }
+                         }">
+                        {{-- Content cloned via JS --}}
                     </div>
 
                     {{-- Calendar Content --}}
@@ -1501,8 +1573,8 @@
                 </div>
             </div>
 
-            {{-- Export Loading Overlay (On top of Modal) --}}
-            <div x-show="printExporting" class="absolute inset-0 bg-black/60 flex items-center justify-center z-[110] rounded-2xl" @click.stop>
+            {{-- Export Loading Overlay --}}
+            <div x-show="printExporting" class="absolute inset-0 bg-black/60 flex items-center justify-center z-50">
                 <div class="bg-white rounded-2xl px-8 py-6 shadow-2xl flex flex-col items-center gap-3">
                     <svg class="animate-spin h-10 w-10 text-[#C41E3A]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -1512,8 +1584,15 @@
                     <p class="text-sm text-gray-500">Vui lòng đợi trong giây lát</p>
                 </div>
             </div>
+
+            {{-- Instructions Hint (bottom) --}}
+            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-4 py-2 rounded-full backdrop-blur-sm pointer-events-none"
+                 x-show="!printExporting"
+                 x-transition>
+                💡 Cuộn chuột để zoom • Kéo nền để di chuyển • Kéo từng khối để căn chỉnh
+            </div>
         </div>
-        {{-- ====== END EXPORT MODAL ====== --}}
+        {{-- ====== END PRINT PREVIEW ====== --}}
 
     </div>
 
